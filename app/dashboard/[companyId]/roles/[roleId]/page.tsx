@@ -40,7 +40,7 @@ export default async function RoleQueuePage({
 					<p className="text-3 uppercase tracking-[0.2em] text-gray-9">{role.type}</p>
 					<h1 className="text-8 font-bold text-gray-12">{role.title} review queue</h1>
 				</div>
-				{query?.share === "1" && <RoleSharePanel role={role as unknown as Role} onClose={() => undefined} />}
+				{query?.share === "1" && <RoleSharePanel role={role as unknown as Role} />}
 				<ReviewQueue applications={(applications || []) as never} />
 			</div>
 		</main>
