@@ -8,6 +8,25 @@ export type ApplicationQuestion = {
 	required?: boolean;
 };
 
+export const reviewStatuses = [
+	"applied",
+	"needs_info",
+	"sample_requested",
+	"test_sent",
+	"test_submitted",
+	"bench",
+] as const;
+
+export type ReviewStatus = (typeof reviewStatuses)[number];
+
+export const rejectReasons = [
+	"no sample",
+	"sample not theirs",
+	"can't hit volume",
+	"rate mismatch",
+	"ghosted",
+] as const;
+
 export const hiringTypeLabels: Record<HiringType, string> = {
 	clipper: "Clipper",
 	moderator: "Moderator",

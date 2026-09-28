@@ -82,9 +82,10 @@ export default async function DashboardPage({
 									</div>
 									{role.description && <p className="mt-4 text-3 text-gray-10">{role.description}</p>}
 									{role.status === "open" && (
-										<Link className="mt-4 inline-block text-3 font-semibold text-accent-11 underline" href={`/apply/${role.id}`}>
-											Copy application link
-										</Link>
+										<div className="mt-4 flex gap-4">
+											<Link className="text-3 font-semibold text-accent-11 underline" href={`/apply/${role.id}`}>Copy application link</Link>
+											<Link className="text-3 font-semibold text-accent-11 underline" href={`/dashboard/${companyId}/roles/${role.id}`}>Review queue</Link>
+										</div>
 									)}
 								</article>
 							))}
