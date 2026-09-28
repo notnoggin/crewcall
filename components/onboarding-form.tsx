@@ -13,19 +13,29 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 		event.preventDefault();
 		setSaving(true);
 		setError("");
-		const response = await fetch("/api/workspaces/onboard", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ companyId, hiringType }),
-		});
 
-		if (!response.ok) {
-			setError((await response.json()).error || "Could not save your setup.");
+		try {
+			const response = await fetch("/api/workspaces/onboard", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ companyId, hiringType }),
+			});
+			const result = (await response.json()) as { error?: string };
+
+			if (!response.ok) {
+				throw new Error(result.error || `Onboarding request failed with HTTP ${response.status}.`);
+			}
+
+			window.location.reload();
+		} catch (submitError) {
+			console.error("Crewcall onboarding failed:", submitError);
+			setError(
+				submitError instanceof Error
+					? submitError.message
+					: "Could not save your setup. Check the server logs for the onboarding error.",
+			);
 			setSaving(false);
-			return;
 		}
-
-		window.location.reload();
 	}
 
 	return (

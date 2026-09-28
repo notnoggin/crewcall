@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { getWhopSdk } from "@/lib/whop-sdk";
 import { notifyApplicant } from "@/lib/notifications";
 import { rejectReasons, type ReviewStatus } from "@/lib/hiring";
+import { grantRosterAccess } from "@/lib/whop-access";
 
 type ActionBody = {
 	action?: "request_sample" | "needs_info" | "send_test" | "test_result" | "hire" | "reject" | "save_review";
@@ -77,14 +78,22 @@ export async function POST(
 		const { data: roleData } = await supabase.from("roles").select("workspace_id, type").eq("id", application.role_id).single();
 		if (!roleData) return NextResponse.json({ error: "Role not found." }, { status: 404 });
 		const roleTag = ["clipper", "moderator", "editor", "va", "ops"].includes(roleData.type.toLowerCase()) ? roleData.type.toLowerCase() : "ops";
-		const { error } = await supabase.from("roster_entries").insert({
+		const { data: rosterEntry, error } = await supabase.from("roster_entries").insert({
 			workspace_id: roleData.workspace_id,
 			application_id: applicationId,
 			person_whop_id: application.applicant_whop_id,
 			role_tag: roleTag,
 			status: "bench",
-		});
-		if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+		}).select("id").single();
+		if (error || !rosterEntry) return NextResponse.json({ error: error?.message || "Could not create roster entry." }, { status: 500 });
+		const workspaceForAccess = companyId;
+		if (workspaceForAccess) {
+			await grantRosterAccess({
+				companyId: workspaceForAccess,
+				personWhopId: application.applicant_whop_id,
+				roleTag,
+			});
+		}
 		nextStatus = "bench";
 		notification = "You have been moved to the Crewcall bench. The team will contact you about next steps.";
 	} else if (body.action === "reject") {

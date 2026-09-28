@@ -50,6 +50,9 @@ export default async function DashboardPage({
 					<Link href="https://docs.whop.com/apps" target="_blank">
 						<Button variant="classic" size="3">Whop docs</Button>
 					</Link>
+					<Link href={`/dashboard/${companyId}/roster`} className="text-3 font-semibold text-accent-11 underline">
+						Open bench
+					</Link>
 				</div>
 				<div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
 					<section className="rounded-3xl border border-gray-a5 bg-gray-a2 p-6">
