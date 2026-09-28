@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 			start_date: startDate || null,
 			deadline: endDate || null,
 		})
-		.select("id")
+		.select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline")
 		.single();
 
 	if (error) {
@@ -85,5 +85,26 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: templateError.message }, { status: 500 });
 	}
 
-	return NextResponse.json({ roleId: role.id });
+	return NextResponse.json({ roleId: role.id, role });
+}
+
+export async function PATCH(request: Request) {
+	const body = (await request.json()) as { roleId?: string; action?: "publish" | "pause" | "close" };
+	if (!body.roleId || !body.action) return NextResponse.json({ error: "Role and action are required." }, { status: 400 });
+	const status = body.action === "publish" ? "open" : body.action === "pause" ? "draft" : "closed";
+	const { error } = await getSupabaseAdmin().from("roles").update({ status }).eq("id", body.roleId);
+	if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+	return NextResponse.json({ ok: true, status });
+}
+
+export async function DELETE(request: Request) {
+	const body = (await request.json()) as { roleId?: string };
+	if (!body.roleId) return NextResponse.json({ error: "Role is required." }, { status: 400 });
+	const supabase = getSupabaseAdmin();
+	const { data: role, error: roleError } = await supabase.from("roles").select("status").eq("id", body.roleId).maybeSingle();
+	if (roleError || !role) return NextResponse.json({ error: "Role not found." }, { status: 404 });
+	if (role.status !== "draft") return NextResponse.json({ error: "Only draft roles can be deleted." }, { status: 400 });
+	const { error } = await supabase.from("roles").delete().eq("id", body.roleId);
+	if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+	return NextResponse.json({ ok: true });
 }

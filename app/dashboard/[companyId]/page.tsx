@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { RoleForm } from "@/components/role-form";
+import { RoleCard } from "@/components/role-card";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getWhopSdk } from "@/lib/whop-sdk";
 
@@ -15,7 +16,13 @@ export default async function DashboardPage({
 	const whopsdk = getWhopSdk();
 	// Ensure the user is logged in on whop.
 	const { userId } = await whopsdk.verifyUserToken(await headers());
-	const displayName = `@${userId}`;
+	let displayName = "Welcome back";
+	try {
+		const user = await whopsdk.users.retrieve(userId);
+		if (user.name || user.username) displayName = `Welcome back, ${user.name || user.username}`;
+	} catch (error) {
+		console.error("Could not load Whop display name:", error);
+	}
 	const supabase = getSupabaseAdmin();
 	const { data: workspace } = await supabase
 		.from("workspaces")
@@ -26,12 +33,12 @@ export default async function DashboardPage({
 	const { data: roles } = workspace
 		? await supabase
 				.from("roles")
-				.select("id, title, type, description, capacity, status")
+				.select("id, title, type, description, capacity, status, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline")
 				.eq("workspace_id", workspace.id)
 				.order("created_at", { ascending: false })
 		: { data: null };
 
-	if (!workspace || !roles?.length) {
+	if (!workspace) {
 		return (
 			<main className="min-h-screen px-5 py-16">
 				<OnboardingForm companyId={companyId} />
@@ -44,7 +51,7 @@ export default async function DashboardPage({
 			<div className="mx-auto max-w-5xl">
 				<div className="mb-10 flex flex-wrap items-end justify-between gap-4">
 					<div>
-						<p className="text-3 text-gray-10">Welcome back, {displayName}</p>
+						<p className="text-3 text-gray-10">{displayName}</p>
 						<h1 className="text-9 font-bold text-gray-12">Your hiring pipeline</h1>
 					</div>
 					<Link href="https://docs.whop.com/apps" target="_blank">
@@ -66,24 +73,7 @@ export default async function DashboardPage({
 							<span className="text-3 text-gray-9">{roles?.length || 0} total</span>
 						</div>
 						<div className="grid gap-3">
-							{roles?.map((role) => (
-								<article key={role.id} className="rounded-2xl border border-gray-a5 bg-gray-a2 p-5">
-									<div className="flex items-start justify-between gap-4">
-										<div>
-											<h3 className="text-5 font-semibold text-gray-12">{role.title}</h3>
-											<p className="mt-1 text-3 text-gray-10">{role.type} · hiring {role.capacity}</p>
-										</div>
-										<span className="rounded-full bg-green-a3 px-3 py-1 text-2 font-semibold uppercase text-green-11">{role.status}</span>
-									</div>
-									{role.description && <p className="mt-4 text-3 text-gray-10">{role.description}</p>}
-									{role.status === "open" && (
-										<div className="mt-4 flex gap-4">
-											<Link className="text-3 font-semibold text-accent-11 underline" href={`/apply/${role.id}`}>Copy application link</Link>
-											<Link className="text-3 font-semibold text-accent-11 underline" href={`/dashboard/${companyId}/roles/${role.id}`}>Review queue</Link>
-										</div>
-									)}
-								</article>
-							))}
+							{roles?.map((role) => <RoleCard key={role.id} role={role as never} companyId={companyId} onChanged={() => window.location.reload()} />)}
 							{!roles?.length && <p className="rounded-2xl border border-dashed border-gray-a6 p-8 text-center text-4 text-gray-9">Create your first role to start accepting applications.</p>}
 						</div>
 					</section>

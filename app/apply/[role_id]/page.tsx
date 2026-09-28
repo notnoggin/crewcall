@@ -1,7 +1,25 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { ApplicationForm } from "@/components/application-form";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ApplicationQuestion } from "@/lib/hiring";
+
+function publicOrigin() {
+	return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ role_id: string }> }): Promise<Metadata> {
+	const { role_id: roleId } = await params;
+	const { data: role } = await getSupabaseAdmin().from("roles").select("id, title, description").eq("id", roleId).maybeSingle();
+	if (!role) return { title: "Crewcall roster" };
+	const description = role.description || `Apply to the Crewcall roster for ${role.title}.`;
+	return {
+		title: `${role.title} | Crewcall roster`,
+		description,
+		openGraph: { title: role.title, description, type: "website", images: [{ url: `${publicOrigin()}/api/banner/${role.id}`, width: 1200, height: 630, alt: `${role.title} Crewcall roster` }] },
+		twitter: { card: "summary_large_image", title: role.title, description, images: [`${publicOrigin()}/api/banner/${role.id}`] },
+	};
+}
 
 export default async function PublicApplicationPage({
 	params,
