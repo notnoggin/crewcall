@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@whop/react/components";
 
-export type Role = { id: string; title: string; type: string; description: string; status: string; capacity: number; intake_mode: string; seat_cap: number | null; platforms: string[]; pay_model: string | null; rate_offered: number | null; creator_name: string | null; niche: string | null; rules: string | null; start_date: string | null; deadline: string | null };
+export type Role = { id: string; title: string; type: string; description: string; status: string; capacity: number; intake_mode: string; seat_cap: number | null; platforms: string[]; pay_model: string | null; rate_offered: number | null; creator_name: string | null; niche: string | null; rules: string | null; start_date: string | null; deadline: string | null; applicantCount?: number; seatsFilled?: number };
 
 export function RoleCard({ role, companyId, onChanged }: { role: Role; companyId: string; onChanged: () => void }) {
+	const router = useRouter();
 	const [shareOpen, setShareOpen] = useState(false);
 	const [message, setMessage] = useState("");
 	async function action(method: "PATCH" | "DELETE", action?: string) {
@@ -14,8 +16,9 @@ export function RoleCard({ role, companyId, onChanged }: { role: Role; companyId
 		const data = await response.json();
 		if (!response.ok) { setMessage(data.error || "Role action failed."); return; }
 		onChanged();
+		router.refresh();
 	}
-	return <article className="rounded-2xl border border-gray-a5 bg-gray-a2 p-5"><div className="flex items-start justify-between gap-4"><div><h3 className="text-5 font-semibold text-gray-12">{role.title}</h3><p className="mt-1 text-3 text-gray-10">{role.type} · {role.intake_mode === "limited_seats" ? `${role.seat_cap} seats` : "roster"}</p></div><span className="rounded-full bg-gray-a4 px-3 py-1 text-2 font-semibold uppercase text-gray-11">{role.status}</span></div>{role.description && <p className="mt-4 text-3 text-gray-10">{role.description}</p>}<div className="mt-4 flex flex-wrap gap-3"><Button size="2" variant="classic" onClick={() => setShareOpen(true)}>Share</Button>{role.status !== "open" && <Button size="2" variant="classic" onClick={() => action("PATCH", "publish")}>Publish / Open</Button>}{role.status === "open" && <Button size="2" variant="classic" onClick={() => action("PATCH", "pause")}>Pause</Button>}{role.status !== "closed" && <Button size="2" variant="classic" onClick={() => action("PATCH", "close")}>Close</Button>}{role.status === "draft" && <Button size="2" variant="classic" onClick={() => action("DELETE")}>Delete</Button>}<Link className="self-center text-3 font-semibold text-accent-11 underline" href={`/dashboard/${companyId}/roles/${role.id}`}>Review queue</Link>{message && <span className="self-center text-3 text-red-10">{message}</span>}</div>{shareOpen && <RoleSharePanel role={role} onClose={() => setShareOpen(false)} />}</article>;
+	return <article className="rounded-2xl border border-gray-a5 bg-gray-a2 p-5"><div className="flex items-start justify-between gap-4"><div><h3 className="text-5 font-semibold text-gray-12">{role.title}</h3><p className="mt-1 text-3 text-gray-10">{role.type} · {role.intake_mode === "limited_seats" ? `${role.seat_cap} seats` : "roster"}</p></div><span className="rounded-full bg-gray-a4 px-3 py-1 text-2 font-semibold uppercase text-gray-11">{role.status}</span></div>{role.description && <p className="mt-4 text-3 text-gray-10">{role.description}</p>}<div className="mt-3 flex flex-wrap gap-3 text-3 text-gray-10"><span>{role.applicantCount ?? 0} applicants</span>{role.intake_mode === "limited_seats" && <span>{role.seatsFilled ?? 0} / {role.seat_cap} seats filled</span>}</div><div className="mt-4 flex flex-wrap gap-3"><Button size="2" variant="classic" onClick={() => setShareOpen(true)}>Share</Button>{role.status !== "open" && <Button size="2" variant="classic" onClick={() => action("PATCH", "publish")}>Publish / Open</Button>}{role.status === "open" && <Button size="2" variant="classic" onClick={() => action("PATCH", "pause")}>Pause</Button>}{role.status !== "closed" && <Button size="2" variant="classic" onClick={() => action("PATCH", "close")}>Close</Button>}{role.status === "draft" && <Button size="2" variant="classic" onClick={() => action("DELETE")}>Delete</Button>}<Link className="self-center text-3 font-semibold text-accent-11 underline" href={`/dashboard/${companyId}/roles/${role.id}`}>Review queue</Link>{message && <span className="self-center text-3 text-red-10">{message}</span>}</div>{shareOpen && <RoleSharePanel role={role} onClose={() => setShareOpen(false)} />}</article>;
 }
 
 export function RoleSharePanel({ role, onClose }: { role: Role; onClose: () => void }) {
