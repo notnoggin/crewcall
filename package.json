@@ -9,9 +9,11 @@
 		"lint": "biome lint"
 	},
 	"dependencies": {
+		"@supabase/supabase-js": "^2.117.2",
 		"@vercel/functions": "^3.1.4",
 		"@whop/react": "0.3.0",
 		"@whop/sdk": "0.0.3",
+		"frosted-ui": "^0.0.1-canary.77",
 		"next": "16.1.1",
 		"react": "19.2.0",
 		"react-dom": "19.2.0"
