@@ -75,7 +75,7 @@ export async function POST(
 		nextStatus = body.outcome === "passed" ? "test_submitted" : body.outcome === "ghosted" ? "dismissed" : "rejected";
 		notification = `Your test result has been marked: ${body.outcome}.`;
 	} else if (body.action === "hire") {
-		const { data: roleData } = await supabase.from("roles").select("workspace_id, type").eq("id", application.role_id).single();
+		const { data: roleData } = await supabase.from("roles").select("workspace_id, type, intake_mode, seat_cap").eq("id", application.role_id).single();
 		if (!roleData) return NextResponse.json({ error: "Role not found." }, { status: 404 });
 		const roleTag = ["clipper", "moderator", "editor", "va", "ops"].includes(roleData.type.toLowerCase()) ? roleData.type.toLowerCase() : "ops";
 		const { data: rosterEntry, error } = await supabase.from("roster_entries").insert({
@@ -95,6 +95,18 @@ export async function POST(
 			});
 		}
 		nextStatus = "bench";
+		if (roleData.intake_mode === "limited_seats" && roleData.seat_cap) {
+			const { count, error: countError } = await supabase
+				.from("applications")
+				.select("id", { count: "exact", head: true })
+				.eq("role_id", application.role_id)
+				.in("status", ["bench", "active", "paused"]);
+			if (countError) return NextResponse.json({ error: countError.message }, { status: 500 });
+			if ((count || 0) >= roleData.seat_cap) {
+				const { error: closeError } = await supabase.from("roles").update({ status: "closed" }).eq("id", application.role_id);
+				if (closeError) return NextResponse.json({ error: closeError.message }, { status: 500 });
+			}
+		}
 		notification = "You have been moved to the Crewcall bench. The team will contact you about next steps.";
 	} else if (body.action === "reject") {
 		if (!body.reason || !rejectReasons.includes(body.reason as (typeof rejectReasons)[number])) {

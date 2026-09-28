@@ -58,7 +58,7 @@ export default async function DashboardPage({
 					<section className="rounded-3xl border border-gray-a5 bg-gray-a2 p-6">
 						<h2 className="mb-1 text-6 font-bold text-gray-12">Create a role</h2>
 						<p className="mb-6 text-3 text-gray-10">Open a new pipeline for your next hire.</p>
-						<RoleForm workspaceId={workspace.id} />
+						<RoleForm workspaceId={workspace.id} defaultType={workspace.hiring_type} />
 					</section>
 					<section>
 						<div className="mb-4 flex items-center justify-between">
