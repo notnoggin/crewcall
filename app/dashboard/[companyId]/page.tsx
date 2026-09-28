@@ -15,15 +15,7 @@ export default async function DashboardPage({
 	const whopsdk = getWhopSdk();
 	// Ensure the user is logged in on whop.
 	const { userId } = await whopsdk.verifyUserToken(await headers());
-
-	// Fetch the neccessary data we want from whop.
-	const [company, user, access] = await Promise.all([
-		whopsdk.companies.retrieve(companyId),
-		whopsdk.users.retrieve(userId),
-		whopsdk.users.checkAccess(companyId, { id: userId }),
-	]);
-
-	const displayName = user.name || `@${user.username}`;
+	const displayName = `@${userId}`;
 	const supabase = getSupabaseAdmin();
 	const { data: workspace } = await supabase
 		.from("workspaces")
