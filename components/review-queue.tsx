@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@whop/react/components";
 import { rejectReasons, reviewStatuses, type ReviewStatus } from "@/lib/hiring";
+import { answerLabel } from "@/lib/application-fields";
 
 type Application = {
 	id: string;
@@ -50,7 +51,7 @@ export function ReviewQueue({ applications }: { applications: Application[] }) {
 							{grouped[status].map((application) => (
 								<button key={application.id} type="button" onClick={() => setSelected(application)} className="rounded-xl border border-gray-a4 bg-gray-a1 p-3 text-left hover:border-accent-8">
 									<p className="truncate text-3 font-semibold text-gray-12">{application.applicant_email}</p>
-									<p className="mt-1 text-2 text-gray-9">{application.weekly_capacity ?? "—"} / week · {application.timezone || "Timezone —"}</p>
+									{(application.weekly_capacity !== null || application.timezone) && <p className="mt-1 text-2 text-gray-9">{[application.weekly_capacity !== null ? `${application.weekly_capacity} / week` : null, application.timezone || null].filter(Boolean).join(" · ")}</p>}
 									<div className="mt-2 flex flex-wrap gap-1 text-2">
 										{application.rate_requested !== null && <span className={application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && application.rate_requested > application.roles.rate_offered ? "rounded bg-red-a3 px-2 py-1 text-red-11" : "rounded bg-gray-a4 px-2 py-1 text-gray-10"}>${application.rate_requested} requested</span>}
 										{application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && <span className="rounded bg-gray-a4 px-2 py-1 text-gray-10">${application.roles.rate_offered} offered</span>}
@@ -110,8 +111,14 @@ function ApplicantDrawer({ application, onClose }: { application: Application; o
 					<section>
 						<h3 className="mb-2 text-4 font-semibold text-gray-12">Application</h3>
 						<div className="grid gap-2 rounded-xl border border-gray-a4 bg-gray-a2 p-4 text-3 text-gray-10">
-							{Object.entries(application.answers || {}).map(([key, value]) => <p key={key}><strong className="text-gray-12">{key}:</strong> {String(value)}</p>)}
-							{application.sample_links?.map((link) => <Link key={link} href={link} target="_blank" rel="noreferrer" className="text-accent-11 underline">{link}</Link>)}
+							{Object.entries(application.answers || {}).map(([key, value]) => {
+								if (key === "clipSamples" && Array.isArray(value)) {
+									return <div key={key} className="grid gap-1"><strong className="text-gray-12">Clip samples</strong>{value.map((sample: { url?: string; views?: string }, index: number) => sample.url ? <Link key={sample.url} href={sample.url} target="_blank" rel="noreferrer" className="text-accent-11 underline">Sample {index + 1}{sample.views ? ` · ${sample.views} views` : ""}</Link> : null)}</div>;
+								}
+								if (value === "" || value === null || typeof value === "undefined" || value === false) return null;
+								return <p key={key}><strong className="text-gray-12">{answerLabel(key)}:</strong> {typeof value === "object" ? JSON.stringify(value) : String(value)}</p>;
+							})}
+							{!Object.hasOwn(application.answers || {}, "clipSamples") && application.sample_links?.map((link) => <Link key={link} href={link} target="_blank" rel="noreferrer" className="text-accent-11 underline">{link}</Link>)}
 						</div>
 					</section>
 					<section className="grid gap-3">

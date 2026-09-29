@@ -9,6 +9,7 @@ export function RoleForm({ workspaceId, companyId, defaultType }: { workspaceId:
 	const [error, setError] = useState("");
 	const [saving, setSaving] = useState(false);
 	const [intakeMode, setIntakeMode] = useState("roster");
+	const [roleType, setRoleType] = useState(defaultType);
 
 	async function submit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -37,10 +38,11 @@ export function RoleForm({ workspaceId, companyId, defaultType }: { workspaceId:
 			</label>
 			<label className="grid gap-2 text-3 font-medium text-gray-11">
 				Role type
-				<select required name="type" defaultValue={defaultType} className="rounded-xl border border-gray-a5 bg-gray-a2 px-4 py-3 text-4 text-gray-12">
+				<select required name="type" value={roleType} onChange={(event) => setRoleType(event.target.value)} className="rounded-xl border border-gray-a5 bg-gray-a2 px-4 py-3 text-4 text-gray-12">
 					<option value="clipper">Clipper</option><option value="moderator">Moderator</option><option value="va">VA</option><option value="custom">Custom</option>
 				</select>
 			</label>
+			<RoleTypeFields roleType={roleType} />
 			<label className="grid gap-2 text-3 font-medium text-gray-11">
 				Intake mode
 				<select name="intakeMode" value={intakeMode} onChange={(event) => setIntakeMode(event.target.value)} className="rounded-xl border border-gray-a5 bg-gray-a2 px-4 py-3 text-4 text-gray-12">
@@ -58,4 +60,20 @@ export function RoleForm({ workspaceId, companyId, defaultType }: { workspaceId:
 			</Button>
 		</form>
 	);
+}
+
+function Input({ label, name, type = "text" }: { label: string; name: string; type?: string }) {
+	return <label className="grid gap-2 text-3 font-medium text-gray-11">{label}<input name={name} type={type} className="rounded-xl border border-gray-a5 bg-gray-a2 px-4 py-3 text-4 text-gray-12" /></label>;
+}
+
+function RoleTypeFields({ roleType }: { roleType: string }) {
+	if (roleType === "custom") return <CustomFields />;
+	if (roleType === "moderator") return <fieldset className="grid gap-3 rounded-2xl border border-gray-a5 p-4"><legend className="text-4 font-semibold text-gray-12">Moderator intake</legend><p className="text-3 text-gray-9">Applicants will answer these scenario questions:</p><textarea name="moderatorSpamQuestion" defaultValue="How would you handle spam?" className="rounded-xl border border-gray-a5 bg-gray-a2 p-3 text-3 text-gray-12" /><textarea name="moderatorRefundQuestion" defaultValue="How would you handle refund rage?" className="rounded-xl border border-gray-a5 bg-gray-a2 p-3 text-3 text-gray-12" /><textarea name="moderatorPayQuestion" defaultValue="What would you do if a clipper argued about pay?" className="rounded-xl border border-gray-a5 bg-gray-a2 p-3 text-3 text-gray-12" /><Input label="Hours available" name="moderatorHours" /><Input label="Timezone overlap" name="moderatorTimezone" /><Input label="Languages" name="moderatorLanguages" /><Input label="Tools" name="moderatorTools" /></fieldset>;
+	if (roleType === "va") return <fieldset className="grid gap-3 rounded-2xl border border-gray-a5 p-4"><legend className="text-4 font-semibold text-gray-12">VA intake</legend><Input label="Work sample link" name="vaSample" type="url" /><Input label="Tools" name="vaTools" /><Input label="Hours" name="vaHours" /><Input label="English level" name="vaEnglish" /><Input label="Rate type and amount" name="vaRate" /><label className="flex items-center gap-2 text-3 text-gray-11"><input type="checkbox" name="vaCanFollowSops" /> Can follow SOPs without a call</label></fieldset>;
+	return <fieldset className="grid gap-3 rounded-2xl border border-gray-a5 p-4"><legend className="text-4 font-semibold text-gray-12">Clipper intake</legend><p className="text-3 text-gray-9">Applicants will provide platforms, 2–4 TikTok/Reels/Shorts samples, niche, geo, languages, capacity, timezone, rate wanted, handle, and same-day availability.</p><Input label="Weekly capacity requested" name="clipperWeeklyCapacity" type="number" /><Input label="Timezone" name="clipperTimezone" /><Input label="Rate wanted" name="clipperRate" /></fieldset>;
+}
+
+function CustomFields() {
+	const [fields, setFields] = useState(["Custom question"]);
+	return <fieldset className="grid gap-3 rounded-2xl border border-gray-a5 p-4"><legend className="text-4 font-semibold text-gray-12">Custom intake builder</legend>{fields.map((field, index) => <div key={`${field}-${index}`} className="flex gap-2"><input name="customQuestions" defaultValue={field} className="min-w-0 flex-1 rounded-xl border border-gray-a5 bg-gray-a2 p-3 text-3 text-gray-12" /><button type="button" onClick={() => setFields(fields.filter((_, item) => item !== index))} className="text-3 text-red-10">Remove</button></div>)}<button type="button" onClick={() => setFields([...fields, "Custom question"])} className="text-left text-3 font-semibold text-accent-11">Add field</button></fieldset>;
 }

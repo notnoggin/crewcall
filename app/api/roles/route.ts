@@ -23,6 +23,7 @@ export async function POST(request: Request) {
 	const minAvgViews = positiveInteger(stringValue(formData.get("minAvgViews")));
 	const startDate = stringValue(formData.get("startDate"));
 	const endDate = stringValue(formData.get("endDate"));
+	const customQuestions = formData.getAll("customQuestions").map(String).map((label) => label.trim()).filter(Boolean);
 
 	if (!workspaceId || !title || !hiringTypes.includes(type as never)) {
 		return NextResponse.json({ error: "Title and a valid role type are required." }, { status: 400 });
@@ -76,9 +77,18 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 
+	const questions = type === "moderator"
+		? [
+				{ id: "spam", label: stringValue(formData.get("moderatorSpamQuestion")) || "How would you handle spam?", type: "textarea", required: true },
+				{ id: "refundRage", label: stringValue(formData.get("moderatorRefundQuestion")) || "How would you handle refund rage?", type: "textarea", required: true },
+				{ id: "payArgument", label: stringValue(formData.get("moderatorPayQuestion")) || "What would you do if a clipper argued about pay?", type: "textarea", required: true },
+			]
+		: type === "custom"
+			? customQuestions.map((label, index) => ({ id: `custom_${index + 1}`, label, type: "textarea" as const, required: false }))
+			: defaultQuestions[type as keyof typeof defaultQuestions];
 	const { error: templateError } = await supabase.from("application_templates").insert({
 		role_id: role.id,
-		questions: defaultQuestions[type as keyof typeof defaultQuestions],
+		questions,
 	});
 
 	if (templateError) {

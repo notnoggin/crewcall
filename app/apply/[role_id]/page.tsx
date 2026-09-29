@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ApplicationQuestion } from "@/lib/hiring";
 
 function publicOrigin() {
-	return process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+	return process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ role_id: string }> }): Promise<Metadata> {

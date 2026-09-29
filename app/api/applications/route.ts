@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { isSupportedClipUrl } from "@/lib/application-fields";
 
 export async function POST(request: Request) {
 	const body = (await request.json()) as {
 		roleId?: string;
 		applicantEmail?: string;
 		applicantWhopId?: string;
-		answers?: Record<string, string>;
+		answers?: Record<string, unknown>;
 	};
 
 	if (!body.roleId || !body.applicantEmail?.trim() || !body.answers) {
@@ -24,6 +25,13 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Applications closed." }, { status: 404 });
 	}
 
+	if (typeof body.answers?.clipSamples !== "undefined") {
+		const samples = body.answers.clipSamples;
+		if (!Array.isArray(samples) || samples.length < 2 || samples.length > 4 || samples.some((sample) => typeof sample?.url !== "string" || !isSupportedClipUrl(sample.url))) {
+			return NextResponse.json({ error: "Clip samples must be 2 to 4 TikTok, Instagram Reels, or YouTube Shorts links." }, { status: 400 });
+		}
+	}
+
 	if (role.intake_mode === "limited_seats" && role.seat_cap) {
 		const { count, error: countError } = await supabase
 			.from("applications")
@@ -37,11 +45,17 @@ export async function POST(request: Request) {
 		}
 	}
 
+	const answers = body.answers;
+	const clipSamples = Array.isArray(answers.clipSamples) ? answers.clipSamples as { url?: string }[] : [];
 	const { error } = await supabase.from("applications").insert({
 		role_id: body.roleId,
 		applicant_email: body.applicantEmail.trim(),
 		applicant_whop_id: body.applicantWhopId?.trim() || null,
-		answers: body.answers,
+		answers,
+		sample_links: clipSamples.map((sample) => sample.url).filter((url): url is string => Boolean(url)),
+		weekly_capacity: typeof answers.weeklyCapacity === "string" && answers.weeklyCapacity ? Number(answers.weeklyCapacity) : null,
+		timezone: typeof answers.timezone === "string" ? answers.timezone : null,
+		rate_requested: typeof answers.rateWanted === "string" && answers.rateWanted ? Number(answers.rateWanted) : null,
 	});
 
 	if (error) {
