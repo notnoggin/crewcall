@@ -6,6 +6,7 @@ import { hiringTypeLabels, hiringTypes, type HiringType } from "@/lib/hiring";
 
 export function OnboardingForm({ companyId }: { companyId: string }) {
 	const [hiringType, setHiringType] = useState<HiringType>("clipper");
+	const [starterRoles, setStarterRoles] = useState(1);
 	const [error, setError] = useState("");
 	const [saving, setSaving] = useState(false);
 
@@ -18,7 +19,7 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 			const response = await fetch("/api/workspaces/onboard", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ companyId, hiringType }),
+				body: JSON.stringify({ companyId, hiringType, starterRoles }),
 			});
 			const result = (await response.json()) as { error?: string };
 
@@ -68,6 +69,13 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 					</button>
 				))}
 			</div>
+			<fieldset className="grid gap-3 rounded-2xl border border-gray-a5 bg-gray-a2 p-5">
+				<legend className="text-4 font-semibold text-gray-12">Start with a role template</legend>
+				<p className="text-3 text-gray-10">Create one or two draft roles now. You can edit, publish, or delete them later.</p>
+				<div className="flex flex-wrap gap-2">
+					{[0, 1, 2].map((count) => <button key={count} type="button" onClick={() => setStarterRoles(count)} className={`rounded-xl border px-4 py-2 text-3 font-semibold ${starterRoles === count ? "border-accent-9 bg-accent-a3 text-gray-12" : "border-gray-a5 text-gray-10"}`}>{count === 0 ? "No starter roles" : `${count} draft role${count === 1 ? "" : "s"}`}</button>)}
+				</div>
+			</fieldset>
 			{error && <p className="text-3 text-red-10">{error}</p>}
 			<Button type="submit" variant="classic" size="4" disabled={saving}>
 				{saving ? "Setting up..." : "Continue"}

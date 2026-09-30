@@ -46,6 +46,7 @@ export async function POST(
 	let eventAction = body.action || "review";
 	let eventNote = body.note?.trim() || null;
 	let notification = "";
+	let notificationResult: { delivered: boolean; channel: string; error?: string } = { delivered: false, channel: "not_attempted" };
 
 	if (body.action === "request_sample") {
 		nextStatus = "sample_requested";
@@ -163,11 +164,13 @@ export async function POST(
 			const statusUrl = `${origin}/apply/${application.role_id}/status/${application.id}?token=${application.status_token}`;
 			const statusLabel = body.action === "test_result" ? `Test ${body.outcome}` : statusLabels[nextStatus] || nextStatus;
 			const delivery = await notifyApplicant({ companyId: companyId || "", applicantWhopId: application.applicant_whop_id, applicantEmail: application.applicant_email, roleTitle: roleTitle || "Crewcall role", statusLabel, statusUrl, note: body.note?.trim() || null, message: notification || `Your application status has been updated to ${statusLabel}.` });
+			notificationResult = delivery;
 			console.info("[APPLICANT NOTIFICATION SENT]", { applicationId, status: statusLabel, channel: delivery.channel, delivered: delivery.delivered });
 		} catch (error) {
 			console.error("[APPLICANT NOTIFICATION]", error);
+			notificationResult = { delivered: false, channel: "failed", error: error instanceof Error ? error.message : "Unknown notification error" };
 		}
 	}
 
-	return NextResponse.json({ ok: true, status: nextStatus || application.status });
+	return NextResponse.json({ ok: true, status: nextStatus || application.status, notification: notificationResult });
 }

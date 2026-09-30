@@ -42,6 +42,9 @@ export async function notifyApplicant({
 		headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
 		body: JSON.stringify({ from, to: [applicantEmail], subject: `${roleTitle}: ${statusLabel}`, text: content }),
 	});
-	if (!response.ok) throw new Error(`Applicant email fallback failed with ${response.status}.`);
+	if (!response.ok) {
+		const detail = await response.text();
+		throw new Error(`Applicant email fallback failed with ${response.status}: ${detail.slice(0, 300)}`);
+	}
 	return { delivered: true, channel: "email_fallback" as const };
 }

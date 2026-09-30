@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
 	try {
-		const body = (await request.json()) as { companyId?: string; hiringType?: string };
+		const body = (await request.json()) as { companyId?: string; hiringType?: string; starterRoles?: number };
 		const companyId = body.companyId?.trim();
 		const hiringType = body.hiringType;
 
@@ -21,6 +21,27 @@ export async function POST(request: Request) {
 
 		if (error) {
 			throw new Error(`Workspace upsert failed: ${error.message}`);
+		}
+
+		const starterRoles = Math.max(0, Math.min(2, Math.floor(body.starterRoles ?? 1)));
+		if (starterRoles > 0) {
+			const roleTitle = hiringType === "clipper" ? "First clipping roster" : hiringType === "moderator" ? "First moderation roster" : hiringType === "va" ? "First VA roster" : "First Crewcall roster";
+			const secondTitle = hiringType === "clipper" ? "Second clipping roster" : hiringType === "moderator" ? "Second moderation roster" : hiringType === "va" ? "Second VA roster" : "Second Crewcall roster";
+			const { data: roles, error: roleError } = await supabase.from("roles").insert(
+				Array.from({ length: starterRoles }, (_, index) => ({
+					workspace_id: workspace.id,
+					title: index === 0 ? roleTitle : secondTitle,
+					type: hiringType,
+					description: "",
+					status: "draft",
+					capacity: 1,
+				})),
+			).select("id");
+			if (roleError) throw new Error(`Starter role creation failed: ${roleError.message}`);
+			if (roles?.length) {
+				const { error: templateError } = await supabase.from("application_templates").insert(roles.map((role) => ({ role_id: role.id, questions: [] })));
+				if (templateError) throw new Error(`Starter template creation failed: ${templateError.message}`);
+			}
 		}
 
 		return NextResponse.json({ workspaceId: workspace.id });

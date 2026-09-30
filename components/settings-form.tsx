@@ -36,5 +36,11 @@ export function SettingsForm({ companyId, initialName, initialHiringType }: { co
 		{error && <p className="text-3 text-red-10">{error}</p>}
 		{message && <p className="text-3 text-green-11">{message}</p>}
 		<Button type="submit" variant="classic" size="3" disabled={saving}>{saving ? "Saving..." : "Save settings"}</Button>
+		<div className="border-t border-gray-a5 pt-5">
+			<p className="text-3 uppercase tracking-[0.16em] text-gray-9">Membership</p>
+			<h2 className="mt-2 text-5 font-semibold text-gray-12">Crewcall Pro</h2>
+			<p className="mt-1 text-3 text-gray-10">$29.99/month or $279.99/year (20% annual discount).</p>
+			<a href={process.env.NEXT_PUBLIC_CREWCALL_PRODUCT_URL || "https://whop.com"} target="_blank" rel="noreferrer" className="mt-3 inline-block text-3 font-semibold text-accent-11 underline">Manage membership in Whop</a>
+		</div>
 	</form>;
 }
