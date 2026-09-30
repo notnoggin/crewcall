@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getWhopSdk } from "@/lib/whop-sdk";
 import { grantRosterAccess, revokeRosterAccess } from "@/lib/whop-access";
+import { hasCrewcallAccess } from "@/lib/crewcall-access";
 
 type Action = "assign" | "release" | "pause" | "dismiss" | "reactivate";
 
@@ -11,6 +12,8 @@ export async function POST(
 	{ params }: { params: Promise<{ rosterId: string }> },
 ) {
 	try {
+		const { hasAccess } = await hasCrewcallAccess();
+		if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 		const { rosterId } = await params;
 		const body = (await request.json()) as { action?: Action; reason?: string; roleId?: string | null };
 		const reason = body.reason?.trim();

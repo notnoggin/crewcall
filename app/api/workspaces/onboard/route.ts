@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { hiringTypes } from "@/lib/hiring";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { hasCrewcallAccess } from "@/lib/crewcall-access";
 
 export async function POST(request: Request) {
 	try {
+		const { hasAccess } = await hasCrewcallAccess();
+		if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 		const body = (await request.json()) as { companyId?: string; hiringType?: string; starterRoles?: number };
 		const companyId = body.companyId?.trim();
 		const hiringType = body.hiringType;

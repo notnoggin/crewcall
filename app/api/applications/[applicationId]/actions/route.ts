@@ -6,6 +6,7 @@ import { getWhopSdk } from "@/lib/whop-sdk";
 import { notifyApplicant } from "@/lib/notifications";
 import { rejectReasons, type ReviewStatus } from "@/lib/hiring";
 import { grantRosterAccess } from "@/lib/whop-access";
+import { hasCrewcallAccess } from "@/lib/crewcall-access";
 
 type ActionBody = {
 	action?: "request_sample" | "needs_info" | "send_test" | "test_result" | "hire" | "reject" | "save_review";
@@ -24,6 +25,8 @@ export async function POST(
 	{ params }: { params: Promise<{ applicationId: string }> },
 ) {
 	const { applicationId } = await params;
+	const { hasAccess } = await hasCrewcallAccess();
+	if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 	const whopsdk = getWhopSdk();
 	const { userId } = await whopsdk.verifyUserToken(await headers());
 	const body = (await request.json()) as ActionBody;

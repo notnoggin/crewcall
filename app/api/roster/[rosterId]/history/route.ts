@@ -1,14 +1,14 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { getWhopSdk } from "@/lib/whop-sdk";
+import { hasCrewcallAccess } from "@/lib/crewcall-access";
 
 export async function GET(
 	_request: Request,
 	{ params }: { params: Promise<{ rosterId: string }> },
 ) {
 	try {
-		await getWhopSdk().verifyUserToken(await headers());
+		const { hasAccess } = await hasCrewcallAccess();
+		if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 		const { rosterId } = await params;
 		const supabase = getSupabaseAdmin();
 		const { data: entry, error: entryError } = await supabase

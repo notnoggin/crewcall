@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { defaultQuestions, hiringTypes } from "@/lib/hiring";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { positiveInteger, stringValue } from "@/lib/validation";
+import { hasCrewcallAccess } from "@/lib/crewcall-access";
 
 export async function POST(request: Request) {
+	const { hasAccess } = await hasCrewcallAccess();
+	if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 	const formData = await request.formData();
 	const workspaceId = stringValue(formData.get("workspaceId"));
 	const title = stringValue(formData.get("title"));
@@ -99,6 +102,8 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+	const { hasAccess } = await hasCrewcallAccess();
+	if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 	const body = (await request.json()) as { roleId?: string; action?: "publish" | "pause" | "close" };
 	if (!body.roleId || !body.action) return NextResponse.json({ error: "Role and action are required." }, { status: 400 });
 	const status = body.action === "publish" ? "open" : body.action === "pause" ? "draft" : "closed";
@@ -108,6 +113,8 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+	const { hasAccess } = await hasCrewcallAccess();
+	if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 	const body = (await request.json()) as { roleId?: string };
 	if (!body.roleId) return NextResponse.json({ error: "Role is required." }, { status: 400 });
 	const supabase = getSupabaseAdmin();
