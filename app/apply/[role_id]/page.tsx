@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: { params: Promise<{ role_id: 
 	return {
 		title: `${role.title} | Crewcall roster`,
 		description,
-		openGraph: { title: role.title, description, type: "website", images: [{ url: `${publicOrigin()}/api/banner/${role.id}`, width: 1200, height: 630, alt: `${role.title} Crewcall roster` }] },
-		twitter: { card: "summary_large_image", title: role.title, description, images: [`${publicOrigin()}/api/banner/${role.id}`] },
+		openGraph: { title: role.title, description, type: "website", images: [{ url: `${publicOrigin()}/crewcall-share-banner.png`, width: 1200, height: 630, alt: `${role.title} Crewcall roster` }] },
+		twitter: { card: "summary_large_image", title: role.title, description, images: [`${publicOrigin()}/crewcall-share-banner.png`] },
 	};
 }
 
