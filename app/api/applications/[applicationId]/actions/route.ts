@@ -161,7 +161,8 @@ export async function POST(
 				dismissed: "Application closed",
 			};
 			const statusUrl = `${origin}/apply/${application.role_id}/status/${application.id}?token=${application.status_token}`;
-			await notifyApplicant({ companyId, applicantWhopId: application.applicant_whop_id, applicantEmail: application.applicant_email, roleTitle: roleTitle || "Crewcall role", statusLabel: statusLabels[nextStatus] || nextStatus, statusUrl, note: eventNote, message: notification || `Your application status has been updated to ${statusLabels[nextStatus] || nextStatus}.` });
+			const statusLabel = body.action === "test_result" ? `Test ${body.outcome}` : statusLabels[nextStatus] || nextStatus;
+			await notifyApplicant({ companyId, applicantWhopId: application.applicant_whop_id, applicantEmail: application.applicant_email, roleTitle: roleTitle || "Crewcall role", statusLabel, statusUrl, note: body.note?.trim() || null, message: notification || `Your application status has been updated to ${statusLabel}.` });
 		} catch (error) {
 			console.error("[APPLICANT NOTIFICATION]", error);
 		}
