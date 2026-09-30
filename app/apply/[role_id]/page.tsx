@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ApplicationQuestion } from "@/lib/hiring";
 
 function publicOrigin() {
-	return process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+	return (process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")).replace(/\/$/, "");
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ role_id: string }> }): Promise<Metadata> {
@@ -53,7 +53,7 @@ export default async function PublicApplicationPage({
 					{role.creator_name && <p className="mt-2 text-4 text-gray-10">{role.creator_name}{role.niche ? ` · ${role.niche}` : ""}</p>}
 					<p className="mt-3 whitespace-pre-wrap text-4 text-gray-10">{role.description}</p>
 					<div className="mt-5 grid gap-2 rounded-2xl border border-gray-a5 bg-gray-a2 p-4 text-3 text-gray-10">
-						{role.platforms?.length > 0 && <p><strong className="text-gray-12">Platforms:</strong> {role.platforms.join(", ")}</p>}
+						{role.type === "clipper" && role.platforms?.length > 0 && <p><strong className="text-gray-12">Platforms:</strong> {role.platforms.join(", ")}</p>}
 						{role.pay_model && <p><strong className="text-gray-12">Pay:</strong> {role.pay_model} {role.rate_offered !== null ? `· ${role.rate_offered}` : ""}</p>}
 						{role.rules && <p><strong className="text-gray-12">Rules:</strong> {role.rules}</p>}
 						{role.example_clip_links?.length > 0 && <p><strong className="text-gray-12">Examples:</strong> {role.example_clip_links.map((link: string) => <a key={link} href={link} target="_blank" rel="noreferrer" className="ml-2 text-accent-11 underline">{link}</a>)}</p>}
@@ -65,6 +65,7 @@ export default async function PublicApplicationPage({
 				<div className="rounded-3xl border border-gray-a5 bg-gray-a2 p-6 sm:p-8">
 					{isClosed ? <div className="rounded-2xl border border-gray-a5 bg-gray-a3 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Applications closed</h2><p className="mt-2 text-4 text-gray-10">This roster is not accepting new applicants.</p></div> : <ApplicationForm roleId={role.id} roleType={role.type} questions={questions} />}
 				</div>
+				<p className="mt-5 text-3 text-gray-10">Having an issue? <a href={`mailto:${process.env.SUPPORT_EMAIL || "support@crewcall.app"}`} className="text-accent-11 underline">Contact support</a></p>
 			</div>
 		</main>
 	);

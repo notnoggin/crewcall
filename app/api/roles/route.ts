@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 	if (intakeMode === "limited_seats" && !seatCap) {
 		return NextResponse.json({ error: "A seat cap is required for limited seats." }, { status: 400 });
 	}
-	if (!platforms.length) {
+	if (type === "clipper" && !platforms.length) {
 		return NextResponse.json({ error: "Select at least one platform." }, { status: 400 });
 	}
 	if (!payModel || !rateOffered || Number(rateOffered) < 0) {

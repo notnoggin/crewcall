@@ -30,7 +30,7 @@ export async function POST(
 	const supabase = getSupabaseAdmin();
 	const { data: application, error: applicationError } = await supabase
 		.from("applications")
-		.select("id, role_id, applicant_whop_id, notes, score, status, roles(workspaces(whop_company_id))")
+		.select("id, role_id, applicant_whop_id, applicant_email, status_token, notes, score, status, roles(title, workspaces(whop_company_id))")
 		.eq("id", applicationId)
 		.maybeSingle();
 
@@ -147,9 +147,21 @@ export async function POST(
 	});
 	if (eventError) return NextResponse.json({ error: eventError.message }, { status: 500 });
 
-	if (notification && companyId) {
+	if (nextStatus && companyId) {
 		try {
-			await notifyApplicant({ companyId, applicantWhopId: application.applicant_whop_id, message: notification });
+			const origin = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || request.nextUrl.origin;
+			const roleTitle = Array.isArray(application.roles) ? application.roles[0]?.title : role?.title;
+			const statusLabels: Record<string, string> = {
+				needs_info: "More information needed",
+				sample_requested: "More samples requested",
+				test_sent: "Test sent",
+				test_submitted: "Test submitted",
+				bench: "Added to the hiring bench",
+				rejected: "Not moving forward",
+				dismissed: "Application closed",
+			};
+			const statusUrl = `${origin}/apply/${application.role_id}/status/${application.id}?token=${application.status_token}`;
+			await notifyApplicant({ companyId, applicantWhopId: application.applicant_whop_id, applicantEmail: application.applicant_email, roleTitle: roleTitle || "Crewcall role", statusLabel: statusLabels[nextStatus] || nextStatus, statusUrl, note: eventNote, message: notification || `Your application status has been updated to ${statusLabels[nextStatus] || nextStatus}.` });
 		} catch (error) {
 			console.error("[APPLICANT NOTIFICATION]", error);
 		}

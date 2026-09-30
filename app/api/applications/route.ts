@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
 	const answers = body.answers;
 	const clipSamples = Array.isArray(answers.clipSamples) ? answers.clipSamples as { url?: string }[] : [];
-	const { error } = await supabase.from("applications").insert({
+	const { data: application, error } = await supabase.from("applications").insert({
 		role_id: body.roleId,
 		applicant_email: body.applicantEmail.trim(),
 		applicant_whop_id: body.applicantWhopId?.trim() || null,
@@ -56,11 +56,12 @@ export async function POST(request: Request) {
 		weekly_capacity: typeof answers.weeklyCapacity === "string" && answers.weeklyCapacity ? Number(answers.weeklyCapacity) : null,
 		timezone: typeof answers.timezone === "string" ? answers.timezone : null,
 		rate_requested: typeof answers.rateWanted === "string" && answers.rateWanted ? Number(answers.rateWanted) : null,
-	});
+	}).select("id, status_token").single();
 
 	if (error) {
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
 
-	return NextResponse.json({ ok: true });
+	const origin = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || new URL(request.url).origin;
+	return NextResponse.json({ ok: true, statusUrl: application ? `${origin}/apply/${body.roleId}/status/${application.id}?token=${application.status_token}` : null });
 }
