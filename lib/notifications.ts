@@ -20,7 +20,7 @@ export async function notifyApplicant({
 	message: string;
 }) {
 	const content = [`Crewcall application update`, `Role: ${roleTitle}`, `Status: ${statusLabel}`, message, note?.trim() ? `Reviewer note: ${note.trim()}` : null, `View status: ${statusUrl}`].filter(Boolean).join("\n\n");
-	if (applicantWhopId) {
+	if (applicantWhopId && companyId) {
 		try {
 			const whopsdk = getWhopSdk();
 			const channel = await whopsdk.supportChannels.create({ company_id: companyId, user_id: applicantWhopId });
@@ -34,7 +34,7 @@ export async function notifyApplicant({
 	const resendKey = process.env.RESEND_API_KEY;
 	const from = process.env.NOTIFICATION_FROM_EMAIL;
 	if (!resendKey || !from) {
-		console.error("[APPLICANT EMAIL FALLBACK UNCONFIGURED]", { applicantEmail, statusLabel });
+		console.error("[APPLICANT EMAIL FALLBACK UNCONFIGURED]", { applicantEmail, statusLabel, reason: "Set RESEND_API_KEY and NOTIFICATION_FROM_EMAIL." });
 		return { delivered: false, channel: "email_fallback" as const };
 	}
 	const response = await fetch("https://api.resend.com/emails", {

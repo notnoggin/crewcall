@@ -77,6 +77,12 @@ function ApplicantDrawer({ application, onClose }: { application: Application; o
 	const [dueAt, setDueAt] = useState("");
 	const [outcome, setOutcome] = useState<"passed" | "failed" | "ghosted">("passed");
 	const [reason, setReason] = useState<(typeof rejectReasons)[number]>(rejectReasons[0]);
+	const hasTest = Boolean(application.tests?.length);
+	const showSampleAction = application.status === "applied";
+	const showSampleWaiting = application.status === "sample_requested";
+	const showSendTest = application.status === "sample_requested";
+	const showTestResult = application.status === "test_sent" && hasTest;
+	const showHire = !["bench", "rejected", "dismissed"].includes(application.status);
 
 	async function action(actionName: string, body: Record<string, unknown> = {}) {
 		setBusy(true);
@@ -124,8 +130,8 @@ function ApplicantDrawer({ application, onClose }: { application: Application; o
 					<section className="grid gap-3">
 						<h3 className="text-4 font-semibold text-gray-12">Reviewer actions</h3>
 						<div className="flex flex-wrap gap-2">
-							<Button size="2" variant="classic" disabled={busy} onClick={() => action("request_sample")}>Request sample</Button>
-							<Button size="2" variant="classic" disabled={busy} onClick={() => action("hire")}>Hire to bench</Button>
+							{showSampleAction && <Button size="2" variant="classic" disabled={busy} onClick={() => action("request_sample")}>Request sample</Button>}
+							{showHire && <Button size="2" variant="classic" disabled={busy} onClick={() => action("hire")}>Hire to bench</Button>}
 						</div>
 						<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Internal note or question to applicant" rows={3} className="rounded-xl border border-gray-a5 bg-gray-a2 p-3 text-3 text-gray-12" />
 						<div className="flex gap-2">
@@ -134,22 +140,23 @@ function ApplicantDrawer({ application, onClose }: { application: Application; o
 							<Button size="2" variant="classic" disabled={busy} onClick={() => action("needs_info", { note })}>Ask applicant</Button>
 						</div>
 					</section>
-					<section className="grid gap-3 rounded-xl border border-gray-a4 bg-gray-a2 p-4">
+					{showSampleWaiting && <section className="grid gap-3 rounded-xl border border-gray-a4 bg-gray-a2 p-4"><h3 className="text-4 font-semibold text-gray-12">Waiting for samples</h3><p className="text-3 text-gray-10">The applicant has been asked for samples. Review submitted links above, or send the test when ready.</p></section>}
+					{showSendTest && <section className="grid gap-3 rounded-xl border border-gray-a4 bg-gray-a2 p-4">
 						<h3 className="text-4 font-semibold text-gray-12">Send test</h3>
 						<textarea value={brief} onChange={(event) => setBrief(event.target.value)} rows={3} placeholder="Test brief" className="rounded-xl border border-gray-a5 bg-gray-a1 p-3 text-3 text-gray-12" />
 						<input type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)} className="rounded-xl border border-gray-a5 bg-gray-a1 p-3 text-3 text-gray-12" />
 						<Button size="2" variant="classic" disabled={busy} onClick={() => action("send_test", { brief, dueAt: dueAt || null, paid: false })}>Send test brief</Button>
-					</section>
-					<section className="grid gap-3 rounded-xl border border-gray-a4 bg-gray-a2 p-4">
+					</section>}
+					{showTestResult && <section className="grid gap-3 rounded-xl border border-gray-a4 bg-gray-a2 p-4">
 						<h3 className="text-4 font-semibold text-gray-12">Test result</h3>
 						<select value={outcome} onChange={(event) => setOutcome(event.target.value as typeof outcome)} className="rounded-xl border border-gray-a5 bg-gray-a1 p-3 text-3 text-gray-12"><option value="passed">Passed</option><option value="failed">Failed</option><option value="ghosted">Ghosted</option></select>
 						<Button size="2" variant="classic" disabled={busy} onClick={() => action("test_result", { outcome })}>Save test result</Button>
-					</section>
-					<section className="grid gap-3 rounded-xl border border-red-a5 bg-red-a2 p-4">
+					</section>}
+					{(application.status === "applied" || application.status === "sample_requested" || application.status === "test_sent" || application.status === "test_submitted") && <section className="grid gap-3 rounded-xl border border-red-a5 bg-red-a2 p-4">
 						<h3 className="text-4 font-semibold text-gray-12">Reject</h3>
 						<select value={reason} onChange={(event) => setReason(event.target.value as (typeof rejectReasons)[number])} className="rounded-xl border border-gray-a5 bg-gray-a1 p-3 text-3 text-gray-12">{rejectReasons.map((item) => <option key={item}>{item}</option>)}</select>
 						<Button size="2" variant="classic" disabled={busy} onClick={() => action("reject", { reason, note })}>Reject applicant</Button>
-					</section>
+					</section>}
 					{message && <p className="text-3 text-gray-10">{message}</p>}
 				</div>
 			</div>

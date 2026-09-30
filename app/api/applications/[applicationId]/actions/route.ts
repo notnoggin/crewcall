@@ -147,9 +147,9 @@ export async function POST(
 	});
 	if (eventError) return NextResponse.json({ error: eventError.message }, { status: 500 });
 
-	if (nextStatus && companyId) {
+	if (nextStatus) {
 		try {
-			const origin = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || request.nextUrl.origin;
+			const origin = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || "https://crewcall-ten.vercel.app";
 			const roleTitle = Array.isArray(application.roles) ? application.roles[0]?.title : role?.title;
 			const statusLabels: Record<string, string> = {
 				needs_info: "More information needed",
@@ -162,7 +162,8 @@ export async function POST(
 			};
 			const statusUrl = `${origin}/apply/${application.role_id}/status/${application.id}?token=${application.status_token}`;
 			const statusLabel = body.action === "test_result" ? `Test ${body.outcome}` : statusLabels[nextStatus] || nextStatus;
-			await notifyApplicant({ companyId, applicantWhopId: application.applicant_whop_id, applicantEmail: application.applicant_email, roleTitle: roleTitle || "Crewcall role", statusLabel, statusUrl, note: body.note?.trim() || null, message: notification || `Your application status has been updated to ${statusLabel}.` });
+			const delivery = await notifyApplicant({ companyId: companyId || "", applicantWhopId: application.applicant_whop_id, applicantEmail: application.applicant_email, roleTitle: roleTitle || "Crewcall role", statusLabel, statusUrl, note: body.note?.trim() || null, message: notification || `Your application status has been updated to ${statusLabel}.` });
+			console.info("[APPLICANT NOTIFICATION SENT]", { applicationId, status: statusLabel, channel: delivery.channel, delivered: delivery.delivered });
 		} catch (error) {
 			console.error("[APPLICANT NOTIFICATION]", error);
 		}

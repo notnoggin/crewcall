@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@whop/react/components";
 import type { ApplicationQuestion } from "@/lib/hiring";
 import { isSupportedClipUrl } from "@/lib/application-fields";
+import { supportEmail } from "@/lib/support";
 
 export function ApplicationForm({ roleId, questions, roleType }: { roleId: string; questions: ApplicationQuestion[]; roleType: string }) {
 	const [submitted, setSubmitted] = useState(false);
@@ -54,7 +55,7 @@ export function ApplicationForm({ roleId, questions, roleType }: { roleId: strin
 		setSaving(false);
 	}
 
-	if (submitted) return <div className="rounded-2xl border border-green-a6 bg-green-a2 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Application received</h2><p className="mt-2 text-4 text-gray-10">Application received. You&apos;ll hear back here.</p>{statusUrl && <p className="mt-4"><a href={statusUrl} className="text-accent-11 underline">View application status</a></p>}<p className="mt-4 text-3 text-gray-10">Having an issue? <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@crewcall.app"}`} className="text-accent-11 underline">Contact support</a></p></div>;
+	if (submitted) return <div className="rounded-2xl border border-green-a6 bg-green-a2 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Application received</h2><p className="mt-2 text-4 text-gray-10">Application received. You&apos;ll hear back here.</p>{statusUrl && <p className="mt-4"><a href={statusUrl} className="text-accent-11 underline">View application status</a></p>}<p className="mt-4 text-3 text-gray-10">Having an issue? <a href={`mailto:${supportEmail}`} className="text-accent-11 underline">Contact support</a></p></div>;
 
 	return <form onSubmit={submit} className="grid gap-5">
 		<Field label="Email address" name="email" type="email" required />
