@@ -12,6 +12,7 @@ export async function POST(request: Request) {
 	const title = stringValue(formData.get("title"));
 	const type = stringValue(formData.get("type"));
 	const intakeMode = stringValue(formData.get("intakeMode")) || "roster";
+	const saveDraft = stringValue(formData.get("saveDraft")) === "true";
 	const seatCap = positiveInteger(stringValue(formData.get("seatCap")));
 	const platforms = formData.getAll("platforms").map(String);
 	const payModel = stringValue(formData.get("payModel"));
@@ -46,13 +47,13 @@ export async function POST(request: Request) {
 	if (intakeMode === "limited_seats" && !seatCap) {
 		return NextResponse.json({ error: "A seat cap is required for limited seats." }, { status: 400 });
 	}
-	if (type === "clipper" && !platforms.length) {
+	if (!saveDraft && type === "clipper" && !platforms.length) {
 		return NextResponse.json({ error: "Select at least one platform." }, { status: 400 });
 	}
-	if (!payModel || !rateOffered || Number(rateOffered) < 0) {
+	if (!saveDraft && (!payModel || !rateOffered || Number(rateOffered) < 0)) {
 		return NextResponse.json({ error: "Pay model and rate offered are required." }, { status: 400 });
 	}
-	if (!["cpm", "per_clip", "flat_fee", "hourly", "per_task", "custom"].includes(payModel)) {
+	if (payModel && !["cpm", "per_clip", "flat_fee", "hourly", "per_task", "custom"].includes(payModel)) {
 		return NextResponse.json({ error: "Choose a valid pay model." }, { status: 400 });
 	}
 	if (!["USD", "EUR", "GBP", "NGN"].includes(rateCurrency)) {
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
 			title,
 			type,
 			description: rules,
-			status: "open",
+			status: saveDraft ? "draft" : "open",
 			capacity: seatCap || 1,
 			intake_mode: intakeMode,
 			seat_cap: intakeMode === "limited_seats" ? seatCap : null,
@@ -115,7 +116,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: templateError.message }, { status: 500 });
 	}
 
-	return NextResponse.json({ roleId: role.id, role });
+	return NextResponse.json({ roleId: role.id, role, savedAsDraft: saveDraft });
 }
 
 export async function PATCH(request: Request) {

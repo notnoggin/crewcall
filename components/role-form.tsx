@@ -35,6 +35,7 @@ export function RoleForm({ workspaceId, companyId, defaultType }: { workspaceId:
 		setError("");
 		const formData = new FormData(event.currentTarget);
 		formData.set("activeFields", JSON.stringify(activeFields));
+		const saveDraft = formData.get("saveDraft") === "true";
 		const response = await fetch("/api/roles", { method: "POST", body: formData });
 		if (!response.ok) {
 			setError((await response.json()).error || "Could not create the role.");
@@ -43,7 +44,7 @@ export function RoleForm({ workspaceId, companyId, defaultType }: { workspaceId:
 		}
 		const data = await response.json();
 		setSaving(false);
-		router.push(`/dashboard/${companyId}/roles/${data.roleId}?share=1`);
+		router.push(saveDraft ? `/dashboard/${companyId}/roles` : `/dashboard/${companyId}/roles/${data.roleId}?share=1`);
 	}
 
 	return <form onSubmit={submit} className="grid gap-5">
@@ -54,7 +55,10 @@ export function RoleForm({ workspaceId, companyId, defaultType }: { workspaceId:
 		{intakeMode === "limited_seats" && <label className="grid gap-2 text-3 font-medium text-gray-11">Seat cap<input required min="1" type="number" name="seatCap" className="premium-control px-4 py-3 text-4" /></label>}
 		<RoleTypeFields roleType={roleType} activeFields={activeFields} removeField={removeField} />
 		{error && <p className="text-3 text-red-10">{error}</p>}
-		<Button type="submit" variant="classic" size="4" disabled={saving}>{saving ? "Creating..." : "Create role"}</Button>
+		<div className="flex flex-wrap gap-3">
+			<Button type="submit" name="saveDraft" value="false" variant="classic" size="4" disabled={saving}>{saving ? "Creating..." : "Create role"}</Button>
+			<Button type="submit" name="saveDraft" value="true" variant="classic" size="4" disabled={saving}>{saving ? "Saving..." : "Save draft"}</Button>
+		</div>
 	</form>;
 }
 
