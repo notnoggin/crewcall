@@ -121,12 +121,12 @@ function ApplicantDrawer({ application, onClose }: { application: Application; o
 						<div className="grid gap-2 rounded-xl border border-gray-a4 bg-gray-a2 p-4 text-3 text-gray-10">
 							{Object.entries(application.answers || {}).map(([key, value]) => {
 								if (key === "clipSamples" && Array.isArray(value)) {
-									return <div key={key} className="grid gap-1"><strong className="text-gray-12">Clip samples</strong>{value.map((sample: { url?: string; views?: string | number }, index: number) => sample.url ? <Link key={sample.url} href={sample.url} target="_blank" rel="noreferrer" className="text-accent-11 underline">Sample {index + 1}{sample.views ? ` · ${formatViewCount(sample.views)} views` : ""}</Link> : null)}</div>;
+									return <div key={key} className="grid gap-1"><strong className="text-gray-12">Clip samples</strong>{value.map((sample: { url?: string; views?: string | number }, index: number) => sample.url ? <Link key={sample.url} href={sample.url} target="_blank" rel="noreferrer" className="text-accent-11">Sample {index + 1}{sample.views ? ` · ${formatViewCount(sample.views)} views` : ""}</Link> : null)}</div>;
 								}
 								if (value === "" || value === null || typeof value === "undefined" || value === false) return null;
 								return <p key={key}><strong className="text-gray-12">{answerLabel(key)}:</strong> {typeof value === "object" ? JSON.stringify(value) : String(value)}</p>;
 							})}
-							{!Object.hasOwn(application.answers || {}, "clipSamples") && application.sample_links?.map((link) => <Link key={link} href={link} target="_blank" rel="noreferrer" className="text-accent-11 underline">{link}</Link>)}
+							{!Object.hasOwn(application.answers || {}, "clipSamples") && application.sample_links?.map((link) => <Link key={link} href={link} target="_blank" rel="noreferrer" className="text-accent-11">{link}</Link>)}
 						</div>
 					</section>
 					<section className="grid gap-3">

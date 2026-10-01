@@ -68,7 +68,7 @@ export function ApplicationForm({ roleId, questions, roleType, activeFields = []
 		setSaving(false);
 	}
 
-	if (submitted) return <div className="rounded-2xl border border-green-a6 bg-green-a2 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Application received</h2><p className="mt-2 text-4 text-gray-10">Application received. You&apos;ll hear back here.</p>{statusUrl && <p className="mt-4"><a href={statusUrl} className="text-accent-11 underline">View application status</a></p>}<p className="mt-4 text-3 text-gray-10">Having an issue? <a href={`mailto:${supportEmail}`} className="text-accent-11 underline">Contact support</a></p></div>;
+	if (submitted) return <div className="rounded-2xl border border-green-a6 bg-green-a2 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Application received</h2><p className="mt-2 text-4 text-gray-10">Application received. You&apos;ll hear back here.</p>{statusUrl && <p className="mt-4"><a href={statusUrl} className="text-accent-11">View application status</a></p>}<p className="mt-4 text-3 text-gray-10">Having an issue? <a href={`mailto:${supportEmail}`} className="text-accent-11">Contact support</a></p></div>;
 
 	return <form onSubmit={submit} className="grid gap-6">
 		<div className="border-b border-gray-a4 pb-5"><p className="text-5 font-semibold tracking-tight text-gray-12">Tell us about you</p><p className="mt-1 text-3 text-gray-9">A few focused questions, then we&apos;ll take it from here.</p></div>

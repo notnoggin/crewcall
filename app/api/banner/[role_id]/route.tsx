@@ -6,7 +6,8 @@ export const runtime = "edge";
 export async function GET(_request: Request, { params }: { params: Promise<{ role_id: string }> }) {
 	const { role_id: roleId } = await params;
 	try {
-		const { data: role } = await getSupabaseAdmin().from("roles").select("title, platforms, pay_model, rate_offered, rate_currency, intake_mode, seat_cap, applications(status), workspaces(name)").eq("id", roleId).maybeSingle();
+		const { data: role, error } = await getSupabaseAdmin().from("roles").select("title, platforms, pay_model, rate_offered, rate_currency, intake_mode, seat_cap, applications(status), workspaces(name)").eq("id", roleId).maybeSingle();
+		if (error) console.error("Crewcall banner role lookup failed:", error);
 		if (!role) return staticBanner(_request);
 	const workspace = Array.isArray(role.workspaces) ? role.workspaces[0] : role.workspaces;
 	const approved = Array.isArray(role.applications) ? role.applications.filter((item) => ["bench", "active", "paused"].includes(item.status)).length : 0;
