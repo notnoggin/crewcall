@@ -64,38 +64,50 @@ export async function POST(request: Request) {
 	}
 
 	const supabase = getSupabaseAdmin();
-	const { data: role, error } = await supabase
+	const rolePayload = {
+		workspace_id: workspaceId,
+		title,
+		type,
+		description: rules,
+		status: saveDraft ? "draft" : "open",
+		capacity: seatCap || 1,
+		intake_mode: intakeMode,
+		seat_cap: intakeMode === "limited_seats" ? seatCap : null,
+		platforms,
+		pay_model: payModel || null,
+		rate_currency: rateCurrency,
+		rate_offered: rateOffered ? Number(rateOffered) : null,
+		active_fields: activeFields,
+		creator_name: creatorName,
+		niche,
+		geo,
+		languages,
+		rules,
+		example_clip_links: exampleClipLinks,
+		source_footage_url: sourceFootageUrl || null,
+		min_avg_views: minAvgViews || null,
+		start_date: startDate || null,
+		deadline: endDate || null,
+	};
+	let { data: role, error } = await supabase
 		.from("roles")
-		.insert({
-			workspace_id: workspaceId,
-			title,
-			type,
-			description: rules,
-			status: saveDraft ? "draft" : "open",
-			capacity: seatCap || 1,
-			intake_mode: intakeMode,
-			seat_cap: intakeMode === "limited_seats" ? seatCap : null,
-			platforms,
-			pay_model: payModel || null,
-			rate_currency: rateCurrency,
-			rate_offered: rateOffered ? Number(rateOffered) : null,
-			active_fields: activeFields,
-			creator_name: creatorName,
-			niche,
-			geo,
-			languages,
-			rules,
-			example_clip_links: exampleClipLinks,
-			source_footage_url: sourceFootageUrl || null,
-			min_avg_views: minAvgViews || null,
-			start_date: startDate || null,
-			deadline: endDate || null,
-		})
+		.insert(rolePayload)
 		.select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline")
 		.single();
 
+	if (error && /active_fields/i.test(error.message)) {
+		const legacyPayload = { ...rolePayload };
+		delete (legacyPayload as Partial<typeof rolePayload>).active_fields;
+		const retry = await supabase.from("roles").insert(legacyPayload).select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline").single();
+		role = retry.data;
+		error = retry.error;
+	}
+
 	if (error) {
 		return NextResponse.json({ error: error.message }, { status: 500 });
+	}
+	if (!role) {
+		return NextResponse.json({ error: "Role creation returned no role." }, { status: 500 });
 	}
 
 	const questions = type === "moderator"

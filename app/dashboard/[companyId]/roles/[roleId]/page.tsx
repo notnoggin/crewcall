@@ -16,20 +16,31 @@ export default async function RoleQueuePage({
 	const { companyId, roleId } = await params;
 	const query = await searchParams;
 	const supabase = getSupabaseAdmin();
-	const { data: role } = await supabase
+	let { data: role, error: roleError } = await supabase
 		.from("roles")
 		.select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, rate_currency, active_fields, creator_name, niche, rules, start_date, deadline, workspace_id, workspaces!inner(whop_company_id, name)")
 		.eq("id", roleId)
 		.eq("workspaces.whop_company_id", companyId)
 		.maybeSingle();
+	if (roleError && /active_fields/i.test(roleError.message)) {
+		const retry = await supabase.from("roles").select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline, workspace_id, workspaces!inner(whop_company_id, name)").eq("id", roleId).eq("workspaces.whop_company_id", companyId).maybeSingle();
+		role = retry.data ? { ...retry.data, rate_currency: null, active_fields: null } : null;
+		roleError = retry.error;
+	}
 	if (!role) notFound();
 	await expireOverdueTests(supabase, roleId);
 
-	const { data: applications } = await supabase
+	let { data: applications, error: applicationsError } = await supabase
 		.from("applications")
 		.select("id, applicant_email, applicant_whop_id, answers, sample_links, weekly_capacity, timezone, rate_requested, rate_currency, score, notes, status, roles!inner(workspace_id, type, title, rate_offered, rate_currency, active_fields), tests(id, brief, paid, pay_amount, due_at, outcome)")
 		.eq("role_id", roleId)
 		.order("created_at", { ascending: true });
+	if (applicationsError && /active_fields/i.test(applicationsError.message)) {
+		const retry = await supabase.from("applications").select("id, applicant_email, applicant_whop_id, answers, sample_links, weekly_capacity, timezone, rate_requested, rate_currency, score, notes, status, roles!inner(workspace_id, type, title, rate_offered, rate_currency), tests(id, brief, paid, pay_amount, due_at, outcome)").eq("role_id", roleId).order("created_at", { ascending: true });
+		applications = retry.data as typeof applications;
+		applicationsError = retry.error;
+	}
+	if (applicationsError) throw new Error(applicationsError.message);
 
 	return (
 		<main className="min-h-screen overflow-x-auto px-5 py-8 sm:px-8">

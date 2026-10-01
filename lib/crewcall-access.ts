@@ -7,7 +7,7 @@ export const CREWCALL_PRO_URL = "https://whop.com/crewcall/crewcall-pro/";
 export async function hasCrewcallAccess() {
 	const sdk = getWhopSdk();
 	const { userId } = await sdk.verifyUserToken(await headers());
-	if (process.env.CREWCALL_ACCESS_GATING_ENABLED !== "true") {
+	if (process.env.CREWCALL_ACCESS_GATING_ENABLED === "false") {
 		return { userId, hasAccess: true };
 	}
 	const access = await sdk.users.checkAccess(CREWCALL_PRO_PRODUCT_ID, { id: userId });

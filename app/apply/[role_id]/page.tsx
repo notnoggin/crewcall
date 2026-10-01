@@ -32,11 +32,16 @@ export default async function PublicApplicationPage({
 }) {
 	const { role_id: roleId } = await params;
 	const supabase = getSupabaseAdmin();
-	const { data: role } = await supabase
+	let { data: role, error: roleError } = await supabase
 		.from("roles")
 		.select("id, title, type, description, status, intake_mode, seat_cap, creator_name, platforms, pay_model, rate_offered, rate_currency, active_fields, rules, example_clip_links, geo, niche, languages, start_date, deadline, source_footage_url, application_templates(questions), applications(status), workspaces(name)")
 		.eq("id", roleId)
 		.maybeSingle();
+	if (roleError && /active_fields/i.test(roleError.message)) {
+		const retry = await supabase.from("roles").select("id, title, type, description, status, intake_mode, seat_cap, creator_name, platforms, pay_model, rate_offered, rules, example_clip_links, geo, niche, languages, start_date, deadline, source_footage_url, application_templates(questions), applications(status), workspaces(name)").eq("id", roleId).maybeSingle();
+		role = retry.data ? { ...retry.data, rate_currency: null, active_fields: null } : null;
+		roleError = retry.error;
+	}
 
 	if (!role) notFound();
 	const approvedCount = Array.isArray(role.applications) ? role.applications.filter((application) => ["bench", "active", "paused"].includes(application.status)).length : 0;

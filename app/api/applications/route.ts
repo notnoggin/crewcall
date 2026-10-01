@@ -15,11 +15,17 @@ export async function POST(request: Request) {
 	}
 
 	const supabase = getSupabaseAdmin();
-	const { data: role } = await supabase
+	let { data: role, error: roleError } = await supabase
 		.from("roles")
 		.select("id, status, intake_mode, seat_cap, active_fields")
 		.eq("id", body.roleId)
 		.maybeSingle();
+	if (roleError && /active_fields/i.test(roleError.message)) {
+		const retry = await supabase.from("roles").select("id, status, intake_mode, seat_cap").eq("id", body.roleId).maybeSingle();
+		role = retry.data ? { ...retry.data, active_fields: null } : null;
+		roleError = retry.error;
+	}
+	if (roleError) return NextResponse.json({ error: roleError.message }, { status: 500 });
 
 	if (!role || role.status !== "open") {
 		return NextResponse.json({ error: "Applications closed." }, { status: 404 });

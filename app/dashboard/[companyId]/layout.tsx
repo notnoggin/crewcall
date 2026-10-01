@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { hasCrewcallAccess, CREWCALL_PRO_URL } from "@/lib/crewcall-access";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
-export default async function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function DashboardLayout({ children, params }: Readonly<{ children: React.ReactNode; params: Promise<{ companyId: string }> }>) {
 	try {
+		const { companyId } = await params;
+		const { data: workspace } = await getSupabaseAdmin().from("workspaces").select("id").eq("whop_company_id", companyId).maybeSingle();
+		if (!workspace) return children;
 		const { hasAccess } = await hasCrewcallAccess();
 		if (!hasAccess) {
 			return <main className="min-h-screen px-5 py-16"><div className="mx-auto max-w-xl rounded-3xl border border-gray-a5 bg-gray-a2 p-8 text-center"><p className="text-3 font-semibold uppercase tracking-[0.2em] text-gray-9">Crewcall Pro</p><h1 className="mt-3 text-8 font-bold text-gray-12">Start your 3-day free trial</h1><p className="mt-3 text-4 text-gray-10">Crewcall is available with Crewcall Pro. Your Whop trial gives you access now, then continues at $29.99/month or $279.99/year.</p><Link href={CREWCALL_PRO_URL} target="_blank" rel="noreferrer" className="mt-6 inline-block rounded-xl bg-accent-9 px-5 py-3 text-4 font-semibold text-white">Get Crewcall Pro</Link></div></main>;

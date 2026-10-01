@@ -217,11 +217,7 @@ option {
 }
 
 .crewcall-logo {
-	transition: filter 180ms ease, transform 180ms ease;
-}
-
-[data-theme="dark"] .crewcall-logo {
-	filter: invert(1);
+	transition: transform 180ms ease;
 }
 
 .queue-applicant-card {
