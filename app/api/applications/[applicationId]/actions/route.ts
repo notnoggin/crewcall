@@ -81,6 +81,15 @@ export async function POST(
 	} else if (body.action === "hire") {
 		const { data: roleData } = await supabase.from("roles").select("workspace_id, type, intake_mode, seat_cap").eq("id", application.role_id).single();
 		if (!roleData) return NextResponse.json({ error: "Role not found." }, { status: 404 });
+		const { data: existingRosterEntry, error: rosterLookupError } = await supabase
+			.from("roster_entries")
+			.select("id, status")
+			.eq("application_id", applicationId)
+			.maybeSingle();
+		if (rosterLookupError) return NextResponse.json({ error: rosterLookupError.message }, { status: 500 });
+		if (existingRosterEntry) {
+			return NextResponse.json({ error: `Applicant is already on the roster (${existingRosterEntry.status}).` }, { status: 409 });
+		}
 		const roleTag = ["clipper", "moderator", "editor", "va", "ops"].includes(roleData.type.toLowerCase()) ? roleData.type.toLowerCase() : "ops";
 		const { data: rosterEntry, error } = await supabase.from("roster_entries").insert({
 			workspace_id: roleData.workspace_id,

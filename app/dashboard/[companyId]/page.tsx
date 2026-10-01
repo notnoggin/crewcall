@@ -24,7 +24,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 
 	const [{ data: roles }, { count: benchSize }, { count: availableNow }] = await Promise.all([
 		supabase.from("roles").select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline, applications(id, status)").eq("workspace_id", workspace.id).order("created_at", { ascending: false }),
-		supabase.from("roster_entries").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).eq("status", "bench"),
+		supabase.from("roster_entries").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).neq("status", "dismissed"),
 		supabase.from("roster_entries").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).eq("status", "bench"),
 	]);
 	const mapped = (roles || []).map((role) => ({ ...role, applicantCount: role.applications?.length || 0, seatsFilled: role.applications?.filter((item) => ["bench", "active", "paused"].includes(item.status)).length || 0 }));
