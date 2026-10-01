@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 type Theme = "light" | "dark";
 
 export function ThemeToggle() {
-	const [theme, setTheme] = useState<Theme>("light");
+	const [theme, setTheme] = useState<Theme>("dark");
 
 	useEffect(() => {
 		const stored = window.localStorage.getItem("crewcall-theme") as Theme | null;
-		const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+		const preferred: Theme = "dark";
 		const nextTheme = stored === "dark" || stored === "light" ? stored : preferred;
 		document.documentElement.dataset.theme = nextTheme;
 		setTheme(nextTheme);

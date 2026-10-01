@@ -56,14 +56,14 @@ export default async function PublicApplicationPage({
 	const workspace = Array.isArray(role.workspaces) ? role.workspaces[0] : role.workspaces;
 
 	return (
-		<main className="min-h-screen px-5 py-16">
-			<div className="mx-auto max-w-2xl">
-				<div className="mb-6 flex justify-end"><ThemeToggle /></div>
+		<main className="min-h-screen px-5 py-8 sm:px-8 sm:py-12">
+			<div className="mx-auto max-w-3xl">
+				<div className="mb-10 flex items-center justify-between"><div className="crewcall-logo-chip"><img src="/crewcall-logo-modified.png" alt="Crewcall" className="h-full w-full object-contain" /></div><ThemeToggle /></div>
 				<div className="mb-8">
-					<p className="mb-3 text-2 font-semibold uppercase tracking-[0.2em] text-gray-9">Apply to roster</p>
-					<h1 className="text-9 font-bold text-gray-12">{role.title}</h1>
-					{role.creator_name && <p className="mt-2 text-4 text-gray-10">{role.creator_name}{role.niche ? ` · ${role.niche}` : ""}</p>}
-					<p className="mt-3 whitespace-pre-wrap text-4 text-gray-10">{role.description}</p>
+					<p className="page-kicker">Apply to roster</p>
+					<h1 className="page-title max-w-2xl">{role.title}</h1>
+					{role.creator_name && <p className="mt-3 text-4 text-gray-10">{role.creator_name}{role.niche ? ` · ${role.niche}` : ""}</p>}
+					<p className="page-subtitle whitespace-pre-wrap">{role.description}</p>
 					<div className="mt-5 grid gap-2 rounded-2xl border border-gray-a5 bg-gray-a2 p-4 text-3 text-gray-10">
 						{(!activeFields.length || activeFields.includes("platforms")) && role.type === "clipper" && role.platforms?.length > 0 && <p><strong className="text-gray-12">Platforms:</strong> {role.platforms.join(", ")}</p>}
 						{(!activeFields.length || activeFields.includes("pay")) && role.pay_model && <p><strong className="text-gray-12">Pay:</strong> {role.pay_model} {role.rate_offered !== null ? `· ${role.rate_currency === "EUR" ? "€" : role.rate_currency === "GBP" ? "£" : role.rate_currency === "NGN" ? "₦" : "$"}${role.rate_offered}` : ""}</p>}
@@ -74,10 +74,10 @@ export default async function PublicApplicationPage({
 						{seatsRemaining !== null && <p><strong className="text-gray-12">Seats remaining:</strong> {seatsRemaining}</p>}
 					</div>
 				</div>
-				<div className="premium-surface rounded-3xl p-6 sm:p-8">
+				<div className="premium-surface p-6 sm:p-8">
 					{isClosed ? <div className="rounded-2xl border border-gray-a5 bg-gray-a3 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Applications closed</h2><p className="mt-2 text-4 text-gray-10">This roster is not accepting new applicants.</p></div> : <ApplicationForm roleId={role.id} roleType={role.type} questions={questions} activeFields={activeFields} />}
 				</div>
-				<p className="mt-5 text-3 text-gray-10">Having an issue? <a href={`mailto:${supportEmail}`} className="text-accent-11 underline">Contact support</a></p>
+				<p className="mt-6 text-center text-3 text-gray-9">Powered by Crewcall · <a href={`mailto:${supportEmail}`} className="text-accent-11">Contact support</a></p>
 			</div>
 		</main>
 	);

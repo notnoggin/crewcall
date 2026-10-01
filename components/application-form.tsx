@@ -70,7 +70,8 @@ export function ApplicationForm({ roleId, questions, roleType, activeFields = []
 
 	if (submitted) return <div className="rounded-2xl border border-green-a6 bg-green-a2 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Application received</h2><p className="mt-2 text-4 text-gray-10">Application received. You&apos;ll hear back here.</p>{statusUrl && <p className="mt-4"><a href={statusUrl} className="text-accent-11 underline">View application status</a></p>}<p className="mt-4 text-3 text-gray-10">Having an issue? <a href={`mailto:${supportEmail}`} className="text-accent-11 underline">Contact support</a></p></div>;
 
-	return <form onSubmit={submit} className="grid gap-5">
+	return <form onSubmit={submit} className="grid gap-6">
+		<div className="border-b border-gray-a4 pb-5"><p className="text-5 font-semibold tracking-tight text-gray-12">Tell us about you</p><p className="mt-1 text-3 text-gray-9">A few focused questions, then we&apos;ll take it from here.</p></div>
 		<Field label="Email address" name="email" type="email" required />
 		{roleType === "clipper" ? <ClipperFields activeFields={activeFields} /> : roleType === "moderator" ? <ModeratorFields questions={questions} activeFields={activeFields} /> : roleType === "va" ? <VaFields questions={questions} activeFields={activeFields} /> : <QuestionFields questions={questions} />}
 		{error && <p className="text-3 text-red-10">{error}</p>}
@@ -79,11 +80,11 @@ export function ApplicationForm({ roleId, questions, roleType, activeFields = []
 }
 
 function Field({ label, name, type = "text", required = false, placeholder }: { label: string; name: string; type?: string; required?: boolean; placeholder?: string }) {
-	return <label className="grid gap-2 text-3 font-medium text-gray-11">{label}<input required={required} type={type} name={name} placeholder={placeholder} className="rounded-xl border border-gray-a5 bg-gray-a2 px-4 py-3 text-4 text-gray-12 outline-none focus:border-accent-9" /></label>;
+	return <label className="grid gap-2 text-3 font-medium text-gray-11">{label}{required && <span className="ml-1 text-gray-9">*</span>}<input required={required} type={type} name={name} placeholder={placeholder} className="premium-control px-4 py-3 text-4" /></label>;
 }
 
 function Area({ label, name, required = false }: { label: string; name: string; required?: boolean }) {
-	return <label className="grid gap-2 text-3 font-medium text-gray-11">{label}<textarea required={required} name={name} rows={3} className="rounded-xl border border-gray-a5 bg-gray-a2 px-4 py-3 text-4 text-gray-12 outline-none focus:border-accent-9" /></label>;
+	return <label className="grid gap-2 text-3 font-medium text-gray-11">{label}{required && <span className="ml-1 text-gray-9">*</span>}<textarea required={required} name={name} rows={3} className="premium-control min-h-28 p-3 text-4" /></label>;
 }
 
 function QuestionFields({ questions }: { questions: ApplicationQuestion[] }) {

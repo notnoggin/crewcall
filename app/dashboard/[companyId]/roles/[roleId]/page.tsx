@@ -43,13 +43,13 @@ export default async function RoleQueuePage({
 	if (applicationsError) throw new Error(applicationsError.message);
 
 	return (
-		<main className="min-h-screen overflow-x-auto px-5 py-8 sm:px-8">
-			<div className="mx-auto max-w-[1600px]">
+		<main className="dashboard-shell overflow-x-auto">
+			<div className="max-w-[1600px]">
 				<DashboardNav companyId={companyId} />
 				<Link href={`/dashboard/${companyId}`} className="button-link">← Back to dashboard</Link>
-				<div className="my-6">
-					<p className="text-3 uppercase tracking-[0.2em] text-gray-9">{role.type}</p>
-					<h1 className="text-8 font-bold text-gray-12">{role.title} review queue</h1>
+				<div className="my-8">
+					<p className="page-kicker">{role.type} · review queue</p>
+					<h1 className="page-title">{role.title}</h1>
 				</div>
 				{query?.share === "1" && <RoleSharePanel role={role as unknown as Role} />}
 				<ReviewQueue applications={(applications || []) as never} />

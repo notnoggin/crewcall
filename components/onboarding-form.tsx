@@ -40,13 +40,13 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 	}
 
 	return (
-		<form onSubmit={submit} className="mx-auto flex max-w-xl flex-col gap-8">
+		<form onSubmit={submit} className="mx-auto flex max-w-xl flex-col gap-8 premium-surface p-6 sm:p-8">
 			<div>
-				<p className="mb-3 text-2 font-semibold uppercase tracking-[0.2em] text-gray-9">
+				<p className="page-kicker">
 					Welcome to Crewcall
 				</p>
-				<h1 className="text-8 font-bold text-gray-12">What are you hiring for?</h1>
-				<p className="mt-3 text-4 text-gray-10">
+				<h1 className="page-title">What are you hiring for?</h1>
+				<p className="page-subtitle">
 					We&apos;ll tailor your first application template to get you moving.
 				</p>
 			</div>
