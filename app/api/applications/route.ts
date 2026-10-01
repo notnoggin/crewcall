@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 	const supabase = getSupabaseAdmin();
 	const { data: role } = await supabase
 		.from("roles")
-		.select("id, status, intake_mode, seat_cap")
+		.select("id, status, intake_mode, seat_cap, active_fields")
 		.eq("id", body.roleId)
 		.maybeSingle();
 
@@ -56,6 +56,7 @@ export async function POST(request: Request) {
 		weekly_capacity: typeof answers.weeklyCapacity === "string" && answers.weeklyCapacity ? Number(answers.weeklyCapacity) : null,
 		timezone: typeof answers.timezone === "string" ? answers.timezone : null,
 		rate_requested: typeof answers.rateWanted === "string" && answers.rateWanted ? Number(answers.rateWanted) : null,
+		rate_currency: typeof answers.rateCurrency === "string" ? answers.rateCurrency : "USD",
 	}).select("id, status_token").single();
 
 	if (error) {

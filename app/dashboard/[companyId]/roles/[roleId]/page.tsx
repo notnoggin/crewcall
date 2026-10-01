@@ -18,7 +18,7 @@ export default async function RoleQueuePage({
 	const supabase = getSupabaseAdmin();
 	const { data: role } = await supabase
 		.from("roles")
-		.select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline, workspace_id, workspaces!inner(whop_company_id)")
+		.select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, rate_currency, active_fields, creator_name, niche, rules, start_date, deadline, workspace_id, workspaces!inner(whop_company_id, name)")
 		.eq("id", roleId)
 		.eq("workspaces.whop_company_id", companyId)
 		.maybeSingle();
@@ -27,7 +27,7 @@ export default async function RoleQueuePage({
 
 	const { data: applications } = await supabase
 		.from("applications")
-		.select("id, applicant_email, applicant_whop_id, answers, sample_links, weekly_capacity, timezone, rate_requested, score, notes, status, roles!inner(workspace_id, type, title, rate_offered), tests(id, brief, paid, pay_amount, due_at, outcome)")
+		.select("id, applicant_email, applicant_whop_id, answers, sample_links, weekly_capacity, timezone, rate_requested, rate_currency, score, notes, status, roles!inner(workspace_id, type, title, rate_offered, rate_currency, active_fields), tests(id, brief, paid, pay_amount, due_at, outcome)")
 		.eq("role_id", roleId)
 		.order("created_at", { ascending: true });
 

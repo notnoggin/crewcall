@@ -15,6 +15,15 @@ export async function POST(request: Request) {
 	const seatCap = positiveInteger(stringValue(formData.get("seatCap")));
 	const platforms = formData.getAll("platforms").map(String);
 	const payModel = stringValue(formData.get("payModel"));
+	const rateCurrency = stringValue(formData.get("rateCurrency")) || "USD";
+	const activeFields = (() => {
+		try {
+			const parsed = JSON.parse(stringValue(formData.get("activeFields")));
+			return Array.isArray(parsed) ? parsed.filter((field): field is string => typeof field === "string") : [];
+		} catch {
+			return [];
+		}
+	})();
 	const rateOffered = stringValue(formData.get("rateOffered"));
 	const creatorName = stringValue(formData.get("creatorName"));
 	const niche = stringValue(formData.get("niche"));
@@ -43,6 +52,12 @@ export async function POST(request: Request) {
 	if (!payModel || !rateOffered || Number(rateOffered) < 0) {
 		return NextResponse.json({ error: "Pay model and rate offered are required." }, { status: 400 });
 	}
+	if (!["cpm", "per_clip", "flat_fee", "hourly", "per_task", "custom"].includes(payModel)) {
+		return NextResponse.json({ error: "Choose a valid pay model." }, { status: 400 });
+	}
+	if (!["USD", "EUR", "GBP", "NGN"].includes(rateCurrency)) {
+		return NextResponse.json({ error: "Choose a supported currency." }, { status: 400 });
+	}
 	if (exampleClipLinks.some((link) => !/^https?:\/\//i.test(link))) {
 		return NextResponse.json({ error: "Example clip links must be valid URLs." }, { status: 400 });
 	}
@@ -61,7 +76,9 @@ export async function POST(request: Request) {
 			seat_cap: intakeMode === "limited_seats" ? seatCap : null,
 			platforms,
 			pay_model: payModel || null,
+			rate_currency: rateCurrency,
 			rate_offered: rateOffered ? Number(rateOffered) : null,
+			active_fields: activeFields,
 			creator_name: creatorName,
 			niche,
 			geo,

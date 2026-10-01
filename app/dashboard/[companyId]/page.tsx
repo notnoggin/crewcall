@@ -23,7 +23,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 	if (!workspace) return <main className="min-h-screen px-5 py-16"><OnboardingForm companyId={companyId} /></main>;
 
 	const [{ data: roles }, { count: benchSize }, { count: availableNow }] = await Promise.all([
-		supabase.from("roles").select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline, applications(id, status)").eq("workspace_id", workspace.id).order("created_at", { ascending: false }),
+		supabase.from("roles").select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, rate_currency, creator_name, niche, rules, start_date, deadline, applications(id, status), workspaces(name)").eq("workspace_id", workspace.id).order("created_at", { ascending: false }),
 		supabase.from("roster_entries").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).neq("status", "dismissed"),
 		supabase.from("roster_entries").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).eq("status", "bench"),
 	]);
@@ -38,4 +38,4 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 
 function Summary({ label, value }: { label: string; value: number }) { return <div className="rounded-2xl border border-gray-a5 bg-gray-a2 p-5"><p className="text-3 text-gray-9">{label}</p><p className="mt-2 text-8 font-bold text-gray-12">{value}</p></div>; }
 function Attention({ title, value, href }: { title: string; value: string | number; href: string }) { return <Link href={href} className="rounded-2xl border border-gray-a5 bg-gray-a2 p-4 no-underline hover:border-accent-8"><p className="text-3 font-semibold text-gray-12">{title}</p><p className="mt-2 text-4 text-accent-11">{value} →</p></Link>; }
-function ChecklistStep({ number, title, href }: { number: string; title: string; href?: string }) { const content = <div className="rounded-2xl border border-gray-a5 bg-gray-a1 p-5"><span className="text-3 font-bold text-accent-11">{number}</span><p className="mt-3 text-4 font-semibold text-gray-12">{title}</p></div>; return href ? <Link href={href}>{content}</Link> : content; }
+function ChecklistStep({ number, title, href }: { number: string; title: string; href?: string }) { const content = <div className="rounded-2xl border border-gray-a5 bg-gray-a1 p-5"><span className="text-3 font-bold text-gray-10">{number}</span><p className="mt-3 text-4 font-semibold text-gray-12">{title}</p></div>; return href ? <Link href={href} className="no-underline">{content}</Link> : content; }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@whop/react/components";
 import { rejectReasons, reviewStatuses, type ReviewStatus } from "@/lib/hiring";
 import { answerLabel } from "@/lib/application-fields";
+import { currencySymbol, formatViewCount } from "@/lib/formatting";
 
 type Application = {
 	id: string;
@@ -15,10 +16,11 @@ type Application = {
 	weekly_capacity: number | null;
 	timezone: string | null;
 	rate_requested: number | null;
+	rate_currency?: string | null;
 	score: number | null;
 	notes: string | null;
 	status: ReviewStatus;
-	roles?: { workspace_id: string; type: string; title: string; rate_offered: number | null };
+	roles?: { workspace_id: string; type: string; title: string; rate_offered: number | null; rate_currency?: string | null; active_fields?: string[] | null };
 	tests?: { id: string; brief: string; paid: boolean; pay_amount: number | null; due_at: string | null; outcome: string }[];
 };
 
@@ -53,8 +55,8 @@ export function ReviewQueue({ applications }: { applications: Application[] }) {
 									<p className="min-w-0 truncate text-3 font-semibold text-gray-12" title={application.applicant_email}>{application.applicant_email}</p>
 									{(application.weekly_capacity !== null || application.timezone) && <p className="mt-1 min-w-0 truncate text-2 text-gray-9" title={[application.weekly_capacity !== null ? `${application.weekly_capacity} / week` : null, application.timezone || null].filter(Boolean).join(" · ")}>{[application.weekly_capacity !== null ? `${application.weekly_capacity} / week` : null, application.timezone || null].filter(Boolean).join(" · ")}</p>}
 									<div className="mt-2 flex min-w-0 flex-wrap gap-1 text-2">
-										{application.rate_requested !== null && <span className={application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && application.rate_requested > application.roles.rate_offered ? "rounded bg-red-a3 px-2 py-1 text-red-11" : "rounded bg-gray-a4 px-2 py-1 text-gray-10"}>${application.rate_requested} requested</span>}
-										{application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && <span className="rounded bg-gray-a4 px-2 py-1 text-gray-10">${application.roles.rate_offered} offered</span>}
+										{application.rate_requested !== null && <span className={application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && application.rate_requested > application.roles.rate_offered ? "rounded bg-red-a3 px-2 py-1 text-red-11" : "rounded bg-gray-a4 px-2 py-1 text-gray-10"}>{currencySymbol(application.rate_currency)}{application.rate_requested} requested</span>}
+										{application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && <span className="rounded bg-gray-a4 px-2 py-1 text-gray-10">{currencySymbol(application.roles?.rate_currency)}{application.roles.rate_offered} offered</span>}
 									</div>
 								</button>
 							))}
@@ -119,7 +121,7 @@ function ApplicantDrawer({ application, onClose }: { application: Application; o
 						<div className="grid gap-2 rounded-xl border border-gray-a4 bg-gray-a2 p-4 text-3 text-gray-10">
 							{Object.entries(application.answers || {}).map(([key, value]) => {
 								if (key === "clipSamples" && Array.isArray(value)) {
-									return <div key={key} className="grid gap-1"><strong className="text-gray-12">Clip samples</strong>{value.map((sample: { url?: string; views?: string }, index: number) => sample.url ? <Link key={sample.url} href={sample.url} target="_blank" rel="noreferrer" className="text-accent-11 underline">Sample {index + 1}{sample.views ? ` · ${sample.views} views` : ""}</Link> : null)}</div>;
+									return <div key={key} className="grid gap-1"><strong className="text-gray-12">Clip samples</strong>{value.map((sample: { url?: string; views?: string | number }, index: number) => sample.url ? <Link key={sample.url} href={sample.url} target="_blank" rel="noreferrer" className="text-accent-11 underline">Sample {index + 1}{sample.views ? ` · ${formatViewCount(sample.views)} views` : ""}</Link> : null)}</div>;
 								}
 								if (value === "" || value === null || typeof value === "undefined" || value === false) return null;
 								return <p key={key}><strong className="text-gray-12">{answerLabel(key)}:</strong> {typeof value === "object" ? JSON.stringify(value) : String(value)}</p>;
