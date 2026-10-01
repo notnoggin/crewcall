@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function DashboardNav({ companyId }: { companyId: string }) {
 	const items = [
@@ -7,5 +8,5 @@ export function DashboardNav({ companyId }: { companyId: string }) {
 		["Bench", `/dashboard/${companyId}/roster`],
 		["Settings", `/dashboard/${companyId}/settings`],
 	];
-	return <nav className="mb-8 flex flex-wrap items-center gap-2 rounded-2xl border border-gray-a5 bg-gray-a2 p-2">{items.map(([label, href]) => <Link key={href} href={href} className="rounded-xl px-4 py-2 text-3 font-semibold text-gray-10 hover:bg-gray-a4 hover:text-gray-12">{label}</Link>)}</nav>;
+	return <nav className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-a5 bg-gray-a2 p-2 shadow-sm"><div className="flex flex-wrap items-center gap-1"><Link href={`/dashboard/${companyId}`} className="mr-2 px-3 py-2 text-4 font-black tracking-tight text-gray-12 no-underline">Crewcall</Link>{items.map(([label, href]) => <Link key={href} href={href} className="rounded-xl px-4 py-2 text-3 font-semibold text-gray-10 no-underline hover:bg-gray-a4 hover:text-gray-12">{label}</Link>)}</div><ThemeToggle /></nav>;
 }

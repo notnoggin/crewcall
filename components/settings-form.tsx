@@ -40,7 +40,7 @@ export function SettingsForm({ companyId, initialName, initialHiringType }: { co
 			<p className="text-3 uppercase tracking-[0.16em] text-gray-9">Membership</p>
 			<h2 className="mt-2 text-5 font-semibold text-gray-12">Crewcall Pro</h2>
 			<p className="mt-1 text-3 text-gray-10">$29.99/month or $279.99/year (20% annual discount).</p>
-			<a href="https://whop.com/crewcall/crewcall-pro/" target="_blank" rel="noreferrer" className="mt-3 inline-block text-3 font-semibold text-accent-11 underline">Manage membership in Whop</a>
+			<a href="https://whop.com/crewcall/crewcall-pro/" target="_blank" rel="noreferrer" className="button-link mt-3">Manage membership in Whop</a>
 		</div>
 	</form>;
 }

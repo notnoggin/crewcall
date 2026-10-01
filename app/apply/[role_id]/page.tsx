@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ApplicationForm } from "@/components/application-form";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ApplicationQuestion } from "@/lib/hiring";
 import { supportEmail } from "@/lib/support";
@@ -48,6 +49,7 @@ export default async function PublicApplicationPage({
 	return (
 		<main className="min-h-screen px-5 py-16">
 			<div className="mx-auto max-w-2xl">
+				<div className="mb-6 flex justify-end"><ThemeToggle /></div>
 				<div className="mb-8">
 					<p className="mb-3 text-2 font-semibold uppercase tracking-[0.2em] text-gray-9">Apply to roster</p>
 					<h1 className="text-9 font-bold text-gray-12">{role.title}</h1>
@@ -63,7 +65,7 @@ export default async function PublicApplicationPage({
 						{seatsRemaining !== null && <p><strong className="text-gray-12">Seats remaining:</strong> {seatsRemaining}</p>}
 					</div>
 				</div>
-				<div className="rounded-3xl border border-gray-a5 bg-gray-a2 p-6 sm:p-8">
+				<div className="premium-surface rounded-3xl p-6 sm:p-8">
 					{isClosed ? <div className="rounded-2xl border border-gray-a5 bg-gray-a3 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Applications closed</h2><p className="mt-2 text-4 text-gray-10">This roster is not accepting new applicants.</p></div> : <ApplicationForm roleId={role.id} roleType={role.type} questions={questions} />}
 				</div>
 				<p className="mt-5 text-3 text-gray-10">Having an issue? <a href={`mailto:${supportEmail}`} className="text-accent-11 underline">Contact support</a></p>

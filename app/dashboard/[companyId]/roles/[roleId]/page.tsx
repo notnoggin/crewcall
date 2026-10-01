@@ -35,7 +35,7 @@ export default async function RoleQueuePage({
 		<main className="min-h-screen overflow-x-auto px-5 py-8 sm:px-8">
 			<div className="mx-auto max-w-[1600px]">
 				<DashboardNav companyId={companyId} />
-				<Link href={`/dashboard/${companyId}`} className="text-3 text-accent-11 underline">Back to dashboard</Link>
+				<Link href={`/dashboard/${companyId}`} className="button-link">← Back to dashboard</Link>
 				<div className="my-6">
 					<p className="text-3 uppercase tracking-[0.2em] text-gray-9">{role.type}</p>
 					<h1 className="text-8 font-bold text-gray-12">{role.title} review queue</h1>
