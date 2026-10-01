@@ -98,6 +98,7 @@ export async function POST(request: Request) {
 	if (error && /active_fields/i.test(error.message)) {
 		const legacyPayload = { ...rolePayload };
 		delete (legacyPayload as Partial<typeof rolePayload>).active_fields;
+		delete (legacyPayload as Partial<typeof rolePayload>).rate_currency;
 		const retry = await supabase.from("roles").insert(legacyPayload).select("id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, creator_name, niche, rules, start_date, deadline").single();
 		role = retry.data;
 		error = retry.error;
