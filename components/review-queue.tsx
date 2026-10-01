@@ -42,23 +42,23 @@ export function ReviewQueue({ applications }: { applications: Application[] }) {
 		<>
 			<div className="grid min-w-[1100px] grid-cols-6 gap-3 overflow-x-auto">
 				{reviewStatuses.map((status) => (
-					<section key={status} className="min-h-96 rounded-2xl border border-gray-a5 bg-gray-a2 p-3">
+					<section key={status} className="min-h-96 min-w-0 rounded-2xl border border-gray-a5 bg-gray-a2 p-3">
 						<div className="mb-3 flex items-center justify-between">
 							<h2 className="text-3 font-semibold text-gray-12">{labels[status]}</h2>
 							<span className="rounded-full bg-gray-a4 px-2 py-1 text-2 text-gray-10">{grouped[status].length}</span>
 						</div>
 						<div className="grid gap-2">
 							{grouped[status].map((application) => (
-								<button key={application.id} type="button" onClick={() => setSelected(application)} className="rounded-xl border border-gray-a4 bg-gray-a1 p-3 text-left hover:border-accent-8">
-									<p className="truncate text-3 font-semibold text-gray-12">{application.applicant_email}</p>
-									{(application.weekly_capacity !== null || application.timezone) && <p className="mt-1 text-2 text-gray-9">{[application.weekly_capacity !== null ? `${application.weekly_capacity} / week` : null, application.timezone || null].filter(Boolean).join(" · ")}</p>}
-									<div className="mt-2 flex flex-wrap gap-1 text-2">
+								<button key={application.id} type="button" onClick={() => setSelected(application)} className="queue-applicant-card min-w-0 rounded-xl border border-gray-a4 bg-gray-a1 p-3 text-left hover:border-accent-8">
+									<p className="min-w-0 truncate text-3 font-semibold text-gray-12" title={application.applicant_email}>{application.applicant_email}</p>
+									{(application.weekly_capacity !== null || application.timezone) && <p className="mt-1 min-w-0 truncate text-2 text-gray-9" title={[application.weekly_capacity !== null ? `${application.weekly_capacity} / week` : null, application.timezone || null].filter(Boolean).join(" · ")}>{[application.weekly_capacity !== null ? `${application.weekly_capacity} / week` : null, application.timezone || null].filter(Boolean).join(" · ")}</p>}
+									<div className="mt-2 flex min-w-0 flex-wrap gap-1 text-2">
 										{application.rate_requested !== null && <span className={application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && application.rate_requested > application.roles.rate_offered ? "rounded bg-red-a3 px-2 py-1 text-red-11" : "rounded bg-gray-a4 px-2 py-1 text-gray-10"}>${application.rate_requested} requested</span>}
 										{application.roles?.rate_offered !== null && application.roles?.rate_offered !== undefined && <span className="rounded bg-gray-a4 px-2 py-1 text-gray-10">${application.roles.rate_offered} offered</span>}
 									</div>
 								</button>
 							))}
-							{!grouped[status].length && <p className="py-8 text-center text-2 text-gray-9">{applications.length ? "No applicants in this stage" : "No applicants yet"}</p>}
+							{!grouped[status].length && <p className="queue-empty-state py-8 text-center text-2 text-gray-9">{applications.length ? "This stage is clear for now." : "Your roster is ready for its first applicant."}</p>}
 						</div>
 					</section>
 				))}
@@ -104,11 +104,11 @@ function ApplicantDrawer({ application, onClose }: { application: Application; o
 
 	return (
 		<div className="fixed inset-0 z-20 flex justify-end bg-black-a6" role="dialog" aria-modal="true">
-			<div className="h-full w-full max-w-xl overflow-y-auto border-l border-gray-a5 bg-gray-1 p-6 shadow-2xl">
+			<div className="drawer-panel h-full w-full max-w-xl overflow-y-auto border-l border-gray-a5 bg-gray-1 p-6 shadow-2xl">
 				<div className="mb-6 flex items-start justify-between gap-4">
 					<div>
 						<p className="text-3 text-gray-9">{application.roles?.type}</p>
-						<h2 className="text-7 font-bold text-gray-12">{application.applicant_email}</h2>
+						<h2 className="max-w-[18rem] break-words text-7 font-bold text-gray-12">{application.applicant_email}</h2>
 						<p className="text-3 text-gray-10">{application.status}</p>
 					</div>
 					<Button variant="classic" size="2" onClick={onClose}>Close</Button>

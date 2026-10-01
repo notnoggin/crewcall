@@ -51,7 +51,7 @@ export function Roster({ entries, campaigns }: { entries: RosterEntry[]; campaig
 					<thead className="border-b border-gray-a5 text-gray-9"><tr><th className="p-4">Name</th><th className="p-4">Role</th><th className="p-4">Status</th><th className="p-4">Last active</th><th className="p-4">Campaign</th><th className="p-4">Coverage</th><th className="p-4">Capacity / rate</th></tr></thead>
 					<tbody>{filtered.map((entry) => <tr key={entry.id} onClick={() => setSelected(entry)} className="cursor-pointer border-b border-gray-a4 last:border-0 hover:bg-gray-a3"><td className="p-4"><strong className="text-gray-12">{entry.applicant_email}</strong><span className="block text-2 text-gray-9">{entry.person_whop_id || "No Whop ID"}</span></td><td className="p-4 text-gray-10">{entry.role_tag}</td><td className="p-4 text-gray-10">{statusLabels[entry.status]}</td><td className="p-4 text-gray-10">{entry.last_active_at ? new Date(entry.last_active_at).toLocaleDateString() : "—"}</td><td className="p-4 text-gray-10">{entry.campaign_title || "—"}</td><td className="p-4 text-gray-10">{entry.role_tag === "moderator" ? entry.coverage_window || "—" : "—"}</td><td className="p-4 text-gray-10">{entry.weekly_capacity ?? "—"} / week · {entry.rate_requested === null ? "—" : `$${entry.rate_requested}`}</td></tr>)}</tbody>
 				</table>
-				{!filtered.length && <p className="p-10 text-center text-3 text-gray-9">No bench members match these filters.</p>}
+				{!filtered.length && <p className="p-10 text-center text-3 text-gray-9">No bench members match these filters. Try widening the roster search.</p>}
 			</div>
 			{selected && <RosterDrawer entry={selected} campaigns={campaigns} onClose={() => setSelected(null)} />}
 		</>
