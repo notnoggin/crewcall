@@ -3,11 +3,12 @@ import { getWhopSdk } from "@/lib/whop-sdk";
 
 export const CREWCALL_PRO_PRODUCT_ID = "prod_2i0TRvygPsApM";
 export const CREWCALL_PRO_URL = "https://whop.com/crewcall/crewcall-pro/";
+const CREWCALL_ACCESS_GATING_ENABLED = false;
 
 export async function hasCrewcallAccess() {
 	const sdk = getWhopSdk();
 	const { userId } = await sdk.verifyUserToken(await headers());
-	if (process.env.CREWCALL_ACCESS_GATING_ENABLED === "false") {
+	if (!CREWCALL_ACCESS_GATING_ENABLED) {
 		return { userId, hasAccess: true };
 	}
 	const access = await sdk.users.checkAccess(CREWCALL_PRO_PRODUCT_ID, { id: userId });
