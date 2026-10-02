@@ -22,11 +22,11 @@
 	--gray-11: #3f3f46;
 	--gray-12: #18181b;
 	--gray-a1: rgba(255, 255, 255, 0.86);
-	--gray-a2: rgba(255, 255, 255, 0.96);
+	--gray-a2: rgba(255, 255, 255, 0.995);
 	--gray-a3: rgba(24, 24, 27, 0.035);
 	--gray-a4: rgba(24, 24, 27, 0.06);
-	--gray-a5: rgba(24, 24, 27, 0.09);
-	--gray-a6: rgba(24, 24, 27, 0.14);
+	--gray-a5: rgba(24, 24, 27, 0.13);
+	--gray-a6: rgba(24, 24, 27, 0.2);
 	--accent-9: #3b82f6;
 	--accent-10: #2563eb;
 	--accent-11: #1d4ed8;
@@ -245,7 +245,7 @@ option {
 	border: 1px solid var(--gray-a5);
 	border-radius: 16px;
 	background: var(--gray-a2);
-	box-shadow: 0 16px 45px rgba(0, 0, 0, 0.045), 0 1px 2px rgba(0, 0, 0, 0.04);
+	box-shadow: 0 16px 45px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="dark"] .premium-surface {
@@ -366,8 +366,33 @@ button:not(.theme-toggle):not(.field-remove):disabled {
 	border: 1px solid var(--gray-a5);
 	border-radius: 14px;
 	background: var(--gray-a2);
-	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.025);
+	box-shadow: 0 7px 22px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 	transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.role-filters {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 6px;
+	border: 1px solid var(--gray-a5);
+	border-radius: 14px;
+	background: var(--gray-a3);
+}
+
+.role-filter-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+@media (max-width: 640px) {
+	.role-filters {
+		align-items: stretch;
+		flex-direction: column;
+	}
 }
 
 .metric-card {
