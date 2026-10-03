@@ -14,6 +14,7 @@ export function ApplicationForm({ roleId, questions, roleType, activeFields = []
 	const [statusUrl, setStatusUrl] = useState("");
 	const [email, setEmail] = useState("");
 	const [recovering, setRecovering] = useState(false);
+	const clipSamplesActive = !activeFields.length || activeFields.includes("clipSamples") || activeFields.includes("examples");
 
 	useEffect(() => {
 		const storedStatusUrl = window.localStorage.getItem(`crewcall-application-status:${roleId}`);
@@ -43,12 +44,12 @@ export function ApplicationForm({ roleId, questions, roleType, activeFields = []
 		setError("");
 		const formData = new FormData(event.currentTarget);
 		const clipUrls = formData.getAll("clipSample").map(String).map((value) => value.trim()).filter(Boolean);
-		if (roleType === "clipper" && (!activeFields.length || activeFields.includes("clipSamples")) && (clipUrls.length < 2 || clipUrls.length > 4 || clipUrls.some((url) => !isClipUrlForPlatforms(url, platforms)))) {
+		if (roleType === "clipper" && clipSamplesActive && (clipUrls.length < 2 || clipUrls.length > 4 || clipUrls.some((url) => !isClipUrlForPlatforms(url, platforms)))) {
 			setError(platforms.length ? clipPlatformMessage(platforms) : "Add 2 to 4 valid clip links.");
 			setSaving(false);
 			return;
 		}
-		if (roleType === "clipper" && (!activeFields.length || activeFields.includes("clipSamples"))) {
+		if (roleType === "clipper" && clipSamplesActive) {
 			const invalidView = clipUrls.some((_, index) => {
 				const value = String(formData.get(`clipViews${index + 1}`) || "").trim();
 				return Boolean(value) && parseViewCount(value) === null;
@@ -144,9 +145,10 @@ function QuestionFields({ questions }: { questions: ApplicationQuestion[] }) {
 
 function ClipperFields({ activeFields, platforms }: { activeFields: string[]; platforms: string[] }) {
 	const active = (field: string) => !activeFields.length || activeFields.includes(field);
+	const samplesActive = !activeFields.length || activeFields.includes("clipSamples") || activeFields.includes("examples");
 	return <div className="grid gap-5">
 		{active("socialLinks") && <Field label="Social links" name="socialLinks" required />}
-		{active("clipSamples") && <div className="grid gap-3"><p className="text-3 font-medium text-gray-11">2 to 4 best clip links with self-reported views</p>{[1, 2, 3, 4].map((index) => <div key={index} className="grid gap-3 sm:grid-cols-[1fr_160px]"><input required={index <= 2} name="clipSample" type="url" placeholder={`TikTok, Reels, or Shorts link ${index}`} className="premium-control px-4 py-3 text-4" /><input name={`clipViews${index}`} placeholder="Views (112k, 1.6M)" className="premium-control px-4 py-3 text-4" /></div>)}</div>}
+		{samplesActive && <div className="grid gap-3"><p className="text-3 font-medium text-gray-11">2 to 4 best clip links with self-reported views</p>{[1, 2, 3, 4].map((index) => <div key={index} className="grid gap-3 sm:grid-cols-[1fr_160px]"><input required={index <= 2} name="clipSample" type="url" placeholder={`Sample clip URL ${index}`} className="premium-control px-4 py-3 text-4" /><input name={`clipViews${index}`} placeholder="Views (112k, 1.6M)" className="premium-control px-4 py-3 text-4" /></div>)}</div>}
 		{platforms.length > 0 && <p className="text-3 text-gray-9">Accepted sample platforms: {platforms.join(", ")}.</p>}
 		{active("niche") && <Field label="Niche" name="niche" required />}{active("languages") && <Field label="Languages" name="languages" required />}{active("geo") && <Field label="Geo" name="geo" required />}
 		{active("workMode") && <label className="grid gap-2 text-3 font-medium text-gray-11">Edit / post / both<select required name="workMode" className="premium-control p-3 text-4"><option value="edit">Edit</option><option value="post">Post</option><option value="both">Both</option></select></label>}
