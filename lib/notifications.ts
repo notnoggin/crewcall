@@ -31,6 +31,7 @@ export async function notifyApplicant({
 		}
 	}
 
+	console.info("[APPLICANT EMAIL FALLBACK]", { applicantEmail, statusLabel, reason: applicantWhopId ? "whop_dm_failed" : "no_whop_id" });
 	const resendKey = process.env.RESEND_API_KEY;
 	const from = process.env.NOTIFICATION_FROM_EMAIL;
 	if (!resendKey || !from) {

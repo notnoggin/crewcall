@@ -15,10 +15,15 @@ export async function POST(
 		const { hasAccess } = await hasCrewcallAccess();
 		if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 		const { rosterId } = await params;
-		const body = (await request.json()) as { action?: Action; reason?: string; roleId?: string | null };
+		const body = (await request.json()) as { action?: Action; reason?: string; note?: string; roleId?: string | null };
 		const reason = body.reason?.trim();
-		if (!body.action || !["assign", "release", "pause", "dismiss", "reactivate"].includes(body.action) || !reason) {
-			return NextResponse.json({ error: "An action and reason are required." }, { status: 400 });
+		const note = body.note?.trim();
+		const validDismissReasons = ["no-show", "underperformed", "no-longer-needed", "other"];
+		if (!body.action || !["assign", "release", "pause", "dismiss", "reactivate"].includes(body.action)) {
+			return NextResponse.json({ error: "Choose a valid roster action." }, { status: 400 });
+		}
+		if (body.action === "dismiss" && (!reason || !validDismissReasons.includes(reason))) {
+			return NextResponse.json({ error: "Choose a dismissal reason." }, { status: 400 });
 		}
 
 		const { userId } = await getWhopSdk().verifyUserToken(await headers());
@@ -80,7 +85,7 @@ export async function POST(
 			application_id: entry.application_id,
 			actor_id: userId,
 			action: `roster_${body.action}`,
-			note: [campaignTitle ? `Campaign: ${campaignTitle}` : null, reason].filter(Boolean).join(". "),
+			note: [campaignTitle ? `Campaign: ${campaignTitle}` : null, reason ? `Reason: ${reason}` : null, note].filter(Boolean).join(". ") || null,
 		});
 		if (eventError) throw new Error(`Roster history write failed: ${eventError.message}`);
 
