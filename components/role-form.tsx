@@ -8,7 +8,7 @@ import { currencies } from "@/lib/formatting";
 const defaults: Record<string, string[]> = {
 	clipper: ["pay", "platforms", "examples", "weeklyCapacity", "rateWanted", "messagingHandle"],
 	moderator: ["moderatorScenarios", "moderatorHours", "moderatorTimezone", "moderatorTools"],
-	va: ["vaSample", "vaTools", "vaHours", "vaTimezone", "vaEnglish", "vaWontDo", "vaRate", "vaSops"],
+	va: ["vaSample", "vaTools", "vaHours", "vaRate"],
 	custom: [],
 };
 

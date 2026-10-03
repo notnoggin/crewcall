@@ -55,8 +55,8 @@ export function SettingsForm({ companyId, initialName, initialHiringType, member
 			</div>
 			<label className="mt-4 grid max-w-xs gap-2 text-3 font-medium text-gray-11">Digest frequency<select defaultValue="daily" className="premium-control p-3 text-4"><option value="realtime">Real-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
 		</SettingsSection>
-		<SettingsSection eyebrow="Membership" title="Crewcall Pro">
-			<div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-4 font-semibold text-gray-12">{membership?.planLabel || "Crewcall Pro"}</p><p className="mt-1 text-3 text-gray-9">{membership ? `${membership.status === "trialing" ? "Trial active" : membership.status === "paused" ? "Payments paused" : "Active"}${membership.renewalPeriodEnd ? ` · next payment ${new Date(membership.renewalPeriodEnd).toLocaleDateString()}` : ""}` : "No active Crewcall Pro plan found."}</p></div><a href={membership?.manageUrl || "https://whop.com/crewcall/crewcall-pro/"} target="_blank" rel="noreferrer" className="button-link">{membership ? "Manage or change plan ↗" : "View Crewcall Pro ↗"}</a></div>
+		<SettingsSection eyebrow="Billing" title={membership?.planLabel || "Crewcall Pro"}>
+			<div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-3 text-gray-9">{membership ? `${membership.status === "trialing" ? "Trial active" : membership.status === "paused" ? "Payments paused" : "Active"}${membership.renewalPeriodEnd ? ` · next payment ${new Date(membership.renewalPeriodEnd).toLocaleDateString()}` : ""}` : "No active Crewcall Pro plan found."}</p></div><a href={membership?.manageUrl || "https://whop.com/crewcall/crewcall-pro/"} target="_blank" rel="noreferrer" className="button-link">{membership ? "Manage or change plan ↗" : "View Crewcall Pro ↗"}</a></div>
 		</SettingsSection>
 		{error && <p className="text-3 text-red-10">{error}</p>}
 		{message && <p className="text-3 text-green-10">{message}</p>}

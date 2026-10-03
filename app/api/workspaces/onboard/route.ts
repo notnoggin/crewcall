@@ -6,12 +6,13 @@ import { hasCrewcallAccess } from "@/lib/crewcall-access";
 export async function POST(request: Request) {
 	try {
 		const { hasAccess } = await hasCrewcallAccess();
-		const body = (await request.json()) as { companyId?: string; hiringType?: string; starterRoles?: number };
+		const body = (await request.json()) as { companyId?: string; workspaceName?: string; hiringType?: string; starterRoles?: number };
 		const companyId = body.companyId?.trim();
+		const workspaceName = body.workspaceName?.trim();
 		const hiringType = body.hiringType;
 
-		if (!companyId || !hiringType || !hiringTypes.includes(hiringType as never)) {
-			return NextResponse.json({ error: "A company and hiring type are required." }, { status: 400 });
+		if (!companyId || !workspaceName || !hiringType || !hiringTypes.includes(hiringType as never)) {
+			return NextResponse.json({ error: "A workspace name, company, and hiring type are required." }, { status: 400 });
 		}
 
 		const supabase = getSupabaseAdmin();
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
 		if (existingWorkspace && !hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
 		const { data: workspace, error } = await supabase
 			.from("workspaces")
-			.upsert({ whop_company_id: companyId, hiring_type: hiringType }, { onConflict: "whop_company_id" })
+			.upsert({ whop_company_id: companyId, name: workspaceName, hiring_type: hiringType }, { onConflict: "whop_company_id" })
 			.select("id")
 			.single();
 

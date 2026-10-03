@@ -6,6 +6,7 @@ import { hiringTypeLabels, hiringTypes, type HiringType } from "@/lib/hiring";
 
 export function OnboardingForm({ companyId }: { companyId: string }) {
 	const [hiringType, setHiringType] = useState<HiringType>("clipper");
+	const [workspaceName, setWorkspaceName] = useState("");
 	const [starterRoles, setStarterRoles] = useState(1);
 	const [error, setError] = useState("");
 	const [saving, setSaving] = useState(false);
@@ -19,7 +20,7 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 			const response = await fetch("/api/workspaces/onboard", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ companyId, hiringType, starterRoles }),
+				body: JSON.stringify({ companyId, workspaceName, hiringType, starterRoles }),
 			});
 			const result = (await response.json()) as { error?: string };
 
@@ -50,6 +51,11 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 					We&apos;ll tailor your first application template to get you moving.
 				</p>
 			</div>
+			<label className="grid gap-2 text-3 font-medium text-gray-11">
+				Workspace name
+				<input required value={workspaceName} onChange={(event) => setWorkspaceName(event.target.value)} placeholder="e.g. Acme Media" className="premium-control px-4 py-3 text-4" />
+				<span className="text-3 font-normal text-gray-9">This appears in your share links and applicant-facing pages.</span>
+			</label>
 			<div className="grid gap-3 sm:grid-cols-2">
 				{hiringTypes.map((type) => (
 					<button
