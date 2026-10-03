@@ -295,6 +295,35 @@ button:focus-visible {
 	transform: translateY(-1px);
 }
 
+.status-recovery-link {
+	display: inline-flex;
+	width: fit-content;
+	align-items: center;
+	min-height: 28px;
+	border: 0 !important;
+	border-radius: 7px !important;
+	background: transparent !important;
+	padding: 2px 0 !important;
+	color: var(--accent-11) !important;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.35;
+	box-shadow: none !important;
+	cursor: pointer;
+}
+
+.status-recovery-link:hover:not(:disabled) {
+	background: var(--accent-a3) !important;
+	padding: 2px 7px !important;
+	transform: none !important;
+	box-shadow: none !important;
+}
+
+.status-recovery-link:disabled {
+	cursor: wait;
+	opacity: 0.65;
+}
+
 button:not(.theme-toggle):not(.field-remove) {
 	border: 1px solid #18181b;
 	border-radius: 10px;
