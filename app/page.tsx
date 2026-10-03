@@ -15,7 +15,7 @@ export default function Page() {
 						<p className="page-kicker">Crewcall</p>
 						<h1 className="page-title mt-4 max-w-2xl text-5xl sm:text-7xl">Build a bench you can trust.</h1>
 						<p className="page-subtitle mt-6 max-w-xl text-base sm:text-lg">
-							A calm, focused hiring pipeline for creators and teams building their next roster.
+							A calm, focused hiring pipeline for creators and teams building their next bench.
 						</p>
 						<div className="mt-8 flex flex-wrap gap-3">
 							<Link href="/discover" className="button-link">Explore Crewcall</Link>

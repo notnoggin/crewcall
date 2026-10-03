@@ -51,7 +51,27 @@ export function ApplicationForm({ roleId, questions, roleType, activeFields = []
 					rateCurrency: String(formData.get("rateCurrency") || "USD"),
 					canStartSameDay: formData.get("canStartSameDay") === "on",
 				}
-			: Object.fromEntries(questions.map((question) => [question.id, String(formData.get(question.id) || "").trim()]));
+			: roleType === "moderator"
+				? {
+						...Object.fromEntries(questions.map((question) => [question.id, String(formData.get(question.id) || "").trim()])),
+						hoursAvailable: String(formData.get("hoursAvailable") || "").trim(),
+						timezoneOverlap: String(formData.get("timezoneOverlap") || "").trim(),
+						languages: String(formData.get("languages") || "").trim(),
+						tools: String(formData.get("tools") || "").trim(),
+						banMuteExperience: String(formData.get("banMuteExperience") || "").trim(),
+						scriptOrImprovise: String(formData.get("scriptOrImprovise") || "").trim(),
+					}
+				: {
+						...Object.fromEntries(questions.map((question) => [question.id, String(formData.get(question.id) || "").trim()])),
+						workSample: String(formData.get("workSample") || "").trim(),
+						tools: String(formData.get("tools") || "").trim(),
+						hours: String(formData.get("hours") || "").trim(),
+						timezone: String(formData.get("timezone") || "").trim(),
+						englishLevel: String(formData.get("englishLevel") || "").trim(),
+						wontDo: String(formData.get("wontDo") || "").trim(),
+						rateTypeAmount: String(formData.get("rateTypeAmount") || "").trim(),
+						canFollowSops: formData.get("canFollowSops") === "on",
+					};
 		const response = await fetch("/api/applications", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -75,7 +95,7 @@ export function ApplicationForm({ roleId, questions, roleType, activeFields = []
 		<Field label="Email address" name="email" type="email" required />
 		{roleType === "clipper" ? <ClipperFields activeFields={activeFields} /> : roleType === "moderator" ? <ModeratorFields questions={questions} activeFields={activeFields} /> : roleType === "va" ? <VaFields questions={questions} activeFields={activeFields} /> : <QuestionFields questions={questions} />}
 		{error && <p className="text-3 text-red-10">{error}</p>}
-		<Button type="submit" variant="classic" size="4" disabled={saving}>{saving ? "Applying..." : "Apply to roster"}</Button>
+		<Button type="submit" variant="classic" size="4" disabled={saving}>{saving ? "Applying..." : "Apply to bench"}</Button>
 	</form>;
 }
 
@@ -110,5 +130,5 @@ function ModeratorFields({ questions, activeFields }: { questions: ApplicationQu
 
 function VaFields({ questions, activeFields }: { questions: ApplicationQuestion[]; activeFields: string[] }) {
 	const active = (field: string) => !activeFields.length || activeFields.includes(field);
-	return <div className="grid gap-5">{active("vaSample") && <Field label="Work sample link (cut, sheet, or SOP)" name="workSample" type="url" required />}{active("vaTools") && <Field label="Tools" name="tools" required />}{active("vaHours") && <Field label="Hours" name="hours" required />}{active("vaEnglish") && <Field label="English level" name="englishLevel" required />}{active("vaWontDo") && <Area label="What you won&apos;t do" name="wontDo" required />}{active("vaRate") && <Field label="Rate type and amount" name="rateTypeAmount" required />}{active("vaSops") && <label className="flex items-center gap-2 text-3 text-gray-11"><input type="checkbox" name="canFollowSops" required /> Can follow SOPs without a call</label>}{questions.length > 0 && <QuestionFields questions={questions} />}</div>;
+	return <div className="grid gap-5">{active("vaSample") && <Field label="Work sample link (cut, sheet, or SOP)" name="workSample" type="url" required />}{active("vaTools") && <Field label="Tools" name="tools" required />}{active("vaHours") && <Field label="Hours" name="hours" required />}{active("vaTimezone") && <Field label="Timezone" name="timezone" required />}{active("vaEnglish") && <Field label="English level" name="englishLevel" required />}{active("vaWontDo") && <Area label="What you won&apos;t do" name="wontDo" required />}{active("vaRate") && <Field label="Rate type and amount" name="rateTypeAmount" required />}{active("vaSops") && <label className="flex items-center gap-2 text-3 text-gray-11"><input type="checkbox" name="canFollowSops" required /> Can follow SOPs without a call</label>}{questions.length > 0 && <QuestionFields questions={questions} />}</div>;
 }

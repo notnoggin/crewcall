@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 	if (!saveDraft && type === "clipper" && !platforms.length) {
 		return NextResponse.json({ error: "Select at least one platform." }, { status: 400 });
 	}
-	if (!saveDraft && (!payModel || !rateOffered || Number(rateOffered) < 0)) {
+	if (!saveDraft && activeFields.includes("pay") && (!payModel || !rateOffered || Number(rateOffered) < 0)) {
 		return NextResponse.json({ error: "Pay model and rate offered are required." }, { status: 400 });
 	}
 	if (payModel && !["cpm", "per_clip", "flat_fee", "hourly", "per_task", "custom"].includes(payModel)) {
@@ -151,7 +151,9 @@ export async function DELETE(request: Request) {
 	const supabase = getSupabaseAdmin();
 	const { data: role, error: roleError } = await supabase.from("roles").select("status").eq("id", body.roleId).maybeSingle();
 	if (roleError || !role) return NextResponse.json({ error: "Role not found." }, { status: 404 });
-	if (role.status !== "draft") return NextResponse.json({ error: "Only draft roles can be deleted." }, { status: 400 });
+	const { count: applicantCount, error: countError } = await supabase.from("applications").select("id", { count: "exact", head: true }).eq("role_id", body.roleId);
+	if (countError) return NextResponse.json({ error: countError.message }, { status: 500 });
+	if ((applicantCount || 0) > 0) return NextResponse.json({ error: `This role has ${applicantCount} applicant${applicantCount === 1 ? "" : "s"}. Close it instead of deleting it.` }, { status: 409 });
 	const { error } = await supabase.from("roles").delete().eq("id", body.roleId);
 	if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 	return NextResponse.json({ ok: true });

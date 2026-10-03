@@ -29,8 +29,8 @@ export async function POST(request: Request) {
 
 		const starterRoles = Math.max(0, Math.min(2, Math.floor(body.starterRoles ?? 1)));
 		if (starterRoles > 0) {
-			const roleTitle = hiringType === "clipper" ? "First clipping roster" : hiringType === "moderator" ? "First moderation roster" : hiringType === "va" ? "First VA roster" : "First Crewcall roster";
-			const secondTitle = hiringType === "clipper" ? "Second clipping roster" : hiringType === "moderator" ? "Second moderation roster" : hiringType === "va" ? "Second VA roster" : "Second Crewcall roster";
+			const roleTitle = hiringType === "clipper" ? "First clipping bench" : hiringType === "moderator" ? "First moderation bench" : hiringType === "va" ? "First VA bench" : "First Crewcall bench";
+			const secondTitle = hiringType === "clipper" ? "Second clipping bench" : hiringType === "moderator" ? "Second moderation bench" : hiringType === "va" ? "Second VA bench" : "Second Crewcall bench";
 			const { data: roles, error: roleError } = await supabase.from("roles").insert(
 				Array.from({ length: starterRoles }, (_, index) => ({
 					workspace_id: workspace.id,

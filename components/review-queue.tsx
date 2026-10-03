@@ -60,7 +60,7 @@ export function ReviewQueue({ applications }: { applications: Application[] }) {
 									</div>
 								</button>
 							))}
-							{!grouped[status].length && <p className="queue-empty-state py-8 text-center text-2 text-gray-9">{applications.length ? "This stage is clear for now." : "Your roster is ready for its first applicant."}</p>}
+							{!grouped[status].length && <p className="queue-empty-state py-8 text-center text-2 text-gray-9">{applications.length ? "This stage is clear for now." : "Your bench is ready for its first applicant."}</p>}
 						</div>
 					</section>
 				))}

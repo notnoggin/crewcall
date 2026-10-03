@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ReviewQueue } from "@/components/review-queue";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { RoleSharePanel, type Role } from "@/components/role-card";
+import { RoleActions } from "@/components/role-actions";
 import { expireOverdueTests } from "@/lib/review-queue";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
@@ -51,6 +52,7 @@ export default async function RoleQueuePage({
 					<p className="page-kicker">{role.type} · review queue</p>
 					<h1 className="page-title">{role.title}</h1>
 				</div>
+				<RoleActions roleId={role.id} title={role.title} status={role.status} rolesPath={`/dashboard/${companyId}/roles`} />
 				{query?.share === "1" && <RoleSharePanel role={role as unknown as Role} />}
 				<ReviewQueue applications={(applications || []) as never} />
 			</div>
