@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { clipPlatformMessage, isClipUrlForPlatforms } from "@/lib/application-fields";
 import { getWhopSdk } from "@/lib/whop-sdk";
-import { notifyApplicant } from "@/lib/notifications";
+import { notifyApplicant, notifyWorkspaceAdmins } from "@/lib/notifications";
 
 export async function POST(request: Request) {
 	const body = (await request.json()) as {
@@ -108,6 +108,13 @@ export async function POST(request: Request) {
 			console.info("[APPLICATION SUBMIT NOTIFICATION]", { applicationId: application.id, whopIdFound: Boolean(applicantWhopId), dmAttempted: Boolean(applicantWhopId), result: delivery });
 		} catch (notificationError) {
 			console.error("[APPLICATION SUBMIT NOTIFICATION FAILED]", { applicationId: application.id, error: notificationError instanceof Error ? notificationError.message : "Unknown error" });
+		}
+		if (roleWorkspace?.whop_company_id) {
+			try {
+				await notifyWorkspaceAdmins({ companyId: roleWorkspace.whop_company_id, roleTitle: role.title, applicantEmail: statusEmail, statusUrl });
+			} catch (agencyNotificationError) {
+				console.error("[AGENCY APPLICATION ALERT ERROR]", { applicationId: application.id, error: agencyNotificationError instanceof Error ? agencyNotificationError.message : "Unknown error" });
+			}
 		}
 	}
 	return NextResponse.json({ ok: true, statusUrl });
