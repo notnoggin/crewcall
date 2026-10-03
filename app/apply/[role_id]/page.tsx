@@ -75,7 +75,7 @@ export default async function PublicApplicationPage({
 					</div>
 				</div>
 				<div className="premium-surface p-6 sm:p-8">
-					{isClosed ? <div className="rounded-2xl border border-gray-a5 bg-gray-a3 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Applications closed</h2><p className="mt-2 text-4 text-gray-10">This bench is not accepting new applicants.</p></div> : <ApplicationForm roleId={role.id} roleType={role.type} questions={questions} activeFields={activeFields} />}
+					{isClosed ? <div className="rounded-2xl border border-gray-a5 bg-gray-a3 p-6 text-center"><h2 className="text-6 font-bold text-gray-12">Applications closed</h2><p className="mt-2 text-4 text-gray-10">This bench is not accepting new applicants.</p></div> : <ApplicationForm roleId={role.id} roleType={role.type} questions={questions} activeFields={activeFields} platforms={role.platforms || []} />}
 				</div>
 				<p className="mt-6 text-center text-3 text-gray-9">Powered by Crewcall · <a href={`mailto:${supportEmail}`} className="text-accent-11">Contact support</a></p>
 			</div>
