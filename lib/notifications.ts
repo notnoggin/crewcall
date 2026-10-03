@@ -28,17 +28,41 @@ export async function notifyApplicant({
 		statusLabel,
 	});
 	let dmResult: "success" | "error" | "no_whop_account_found" = "no_whop_account_found";
-	if (applicantWhopId && companyId) {
+	let dmRecipient = applicantWhopId || applicantEmail.trim().toLowerCase();
+	if (dmRecipient) {
 		try {
 			const whopsdk = getWhopSdk();
-			console.info("[APPLICANT WHOP DM CALL]", { applicantWhopId, companyId, statusLabel });
-			const channel = await whopsdk.supportChannels.create({ company_id: companyId, user_id: applicantWhopId });
+			console.info("[APPLICANT WHOP DM CALL]", {
+				applicantWhopId: applicantWhopId || null,
+				recipientType: applicantWhopId ? "user_id" : "email",
+				statusLabel,
+			});
+			const dmResponse = await fetch(`${process.env.WHOP_BASE_URL || "https://api.whop.com/api/v1"}/dm_channels`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${process.env.WHOP_API_KEY || ""}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ with_user_ids: [dmRecipient], notifications_enabled: true }),
+			});
+			if (!dmResponse.ok) {
+				const detail = await dmResponse.text();
+				if (dmResponse.status === 404 || dmResponse.status === 422) {
+					dmResult = "no_whop_account_found";
+					console.info("[APPLICANT WHOP DM RESULT]", { applicantWhopId: applicantWhopId || null, recipientType: applicantWhopId ? "user_id" : "email", result: dmResult, statusLabel });
+				} else {
+					throw new Error(`Whop DM channel creation failed with ${dmResponse.status}: ${detail.slice(0, 300)}`);
+				}
+			} else {
+				const channel = (await dmResponse.json()) as { id?: string };
+				if (!channel.id) throw new Error("Whop DM channel response did not include a channel ID.");
 			await whopsdk.messages.create({ channel_id: channel.id, content });
 			dmResult = "success";
-			console.info("[APPLICANT WHOP DM RESULT]", { applicantWhopId, result: dmResult, statusLabel });
+				console.info("[APPLICANT WHOP DM RESULT]", { applicantWhopId: applicantWhopId || null, recipientType: applicantWhopId ? "user_id" : "email", result: dmResult, statusLabel });
+			}
 		} catch (error) {
 			dmResult = "error";
-			console.error("[APPLICANT WHOP DM RESULT]", { applicantWhopId, result: dmResult, statusLabel, error: error instanceof Error ? error.message : "Unknown error" });
+			console.error("[APPLICANT WHOP DM RESULT]", { applicantWhopId: applicantWhopId || null, recipientType: applicantWhopId ? "user_id" : "email", result: dmResult, statusLabel, error: error instanceof Error ? error.message : "Unknown error" });
 		}
 	} else {
 		console.info("[APPLICANT WHOP DM RESULT]", { applicantWhopId: applicantWhopId || null, result: dmResult, statusLabel });
