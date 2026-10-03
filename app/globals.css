@@ -359,6 +359,19 @@ button:not(.theme-toggle):not(.field-remove):disabled {
 	box-shadow: 0 5px 16px rgba(0, 0, 0, 0.28);
 }
 
+.queue-applicant-card,
+.queue-applicant-card:hover:not(:disabled) {
+	background: var(--gray-a1);
+	color: var(--gray-12);
+}
+
+[data-theme="dark"] .queue-applicant-card,
+[data-theme="dark"] .queue-applicant-card:hover:not(:disabled) {
+	border-color: var(--gray-a4);
+	background: #1c1c1f;
+	color: #f4f4f5;
+}
+
 .status-pill {
 	display: inline-flex;
 	align-items: center;
