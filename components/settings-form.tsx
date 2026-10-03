@@ -4,7 +4,9 @@ import { useState } from "react";
 import { Button } from "@whop/react/components";
 import { hiringTypeLabels, hiringTypes, type HiringType } from "@/lib/hiring";
 
-export function SettingsForm({ companyId, initialName, initialHiringType }: { companyId: string; initialName: string; initialHiringType: HiringType }) {
+type MembershipDetails = { planLabel: string; status: string; renewalPeriodEnd: string | null; manageUrl: string | null };
+
+export function SettingsForm({ companyId, initialName, initialHiringType, membership }: { companyId: string; initialName: string; initialHiringType: HiringType; membership: MembershipDetails | null }) {
 	const [name, setName] = useState(initialName);
 	const [hiringType, setHiringType] = useState<HiringType>(initialHiringType);
 	const [message, setMessage] = useState("");
@@ -54,7 +56,7 @@ export function SettingsForm({ companyId, initialName, initialHiringType }: { co
 			<label className="mt-4 grid max-w-xs gap-2 text-3 font-medium text-gray-11">Digest frequency<select defaultValue="daily" className="premium-control p-3 text-4"><option value="realtime">Real-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
 		</SettingsSection>
 		<SettingsSection eyebrow="Membership" title="Crewcall Pro">
-			<div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-4 font-semibold text-gray-12">Your hiring command center</p><p className="mt-1 text-3 text-gray-9">$29.99/month or $279.99/year with a 3-day free trial.</p></div><a href="https://whop.com/crewcall/crewcall-pro/" target="_blank" rel="noreferrer" className="button-link">Manage membership in Whop ↗</a></div>
+			<div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-4 font-semibold text-gray-12">{membership?.planLabel || "Crewcall Pro"}</p><p className="mt-1 text-3 text-gray-9">{membership ? `${membership.status === "trialing" ? "Trial active" : membership.status === "paused" ? "Payments paused" : "Active"}${membership.renewalPeriodEnd ? ` · next payment ${new Date(membership.renewalPeriodEnd).toLocaleDateString()}` : ""}` : "No active Crewcall Pro plan found."}</p></div><a href={membership?.manageUrl || "https://whop.com/crewcall/crewcall-pro/"} target="_blank" rel="noreferrer" className="button-link">{membership ? "Manage or change plan ↗" : "View Crewcall Pro ↗"}</a></div>
 		</SettingsSection>
 		{error && <p className="text-3 text-red-10">{error}</p>}
 		{message && <p className="text-3 text-green-10">{message}</p>}
