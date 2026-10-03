@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { clipPlatformMessage, isClipUrlForPlatforms } from "@/lib/application-fields";
 import { getWhopSdk } from "@/lib/whop-sdk";
-import { notifyApplicant, notifyWorkspaceAdmins } from "@/lib/notifications";
+import { notifyApplicant, notifyWorkspaceAdminsDm } from "@/lib/notifications";
 
 export async function POST(request: Request) {
 	const body = (await request.json()) as {
@@ -90,6 +90,12 @@ export async function POST(request: Request) {
 	if (error) {
 		return NextResponse.json({ error: error.message }, { status: 500 });
 	}
+	const { error: eventError } = await supabase.from("application_events").insert({
+		application_id: application.id,
+		action: "application_submitted",
+		note: "Application received.",
+	});
+	if (eventError) console.error("[APPLICATION SUBMIT EVENT FAILED]", { applicationId: application.id, error: eventError.message });
 
 	const origin = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || new URL(request.url).origin;
 	const statusUrl = application ? `${origin}/a/${application.id}?k=${application.status_token}` : null;
@@ -111,9 +117,9 @@ export async function POST(request: Request) {
 		}
 		if (roleWorkspace?.whop_company_id) {
 			try {
-				await notifyWorkspaceAdmins({ companyId: roleWorkspace.whop_company_id, roleTitle: role.title, applicantEmail: statusEmail, statusUrl });
+				await notifyWorkspaceAdminsDm({ companyId: roleWorkspace.whop_company_id, roleTitle: role.title, applicantEmail: statusEmail, statusUrl });
 			} catch (agencyNotificationError) {
-				console.error("[AGENCY APPLICATION ALERT ERROR]", { applicationId: application.id, error: agencyNotificationError instanceof Error ? agencyNotificationError.message : "Unknown error" });
+				console.error("[AGENCY WHOP DM ERROR]", { applicationId: application.id, error: agencyNotificationError instanceof Error ? agencyNotificationError.message : "Unknown error" });
 			}
 		}
 	}

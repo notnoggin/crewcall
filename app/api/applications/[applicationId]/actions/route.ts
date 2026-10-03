@@ -173,7 +173,7 @@ export async function POST(
 				rejected: "Not moving forward",
 				dismissed: "Application closed",
 			};
-			const statusUrl = `${origin}/apply/${application.role_id}/status/${application.id}?token=${application.status_token}`;
+			const statusUrl = `${origin}/a/${application.id}?k=${application.status_token}`;
 			const statusLabel = body.action === "test_result" ? `Test ${body.outcome}` : statusLabels[nextStatus] || nextStatus;
 			const delivery = await notifyApplicant({ companyId: companyId || "", applicantWhopId: application.applicant_whop_id, applicantEmail: application.applicant_email, roleTitle: roleTitle || "Crewcall role", statusLabel, statusUrl, note: body.note?.trim() || null, message: notification || `Your application status has been updated to ${statusLabel}.` });
 			notificationResult = delivery;

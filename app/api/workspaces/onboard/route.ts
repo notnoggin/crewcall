@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 		const hiringType = body.hiringType;
 
 		if (!companyId || !workspaceName || !hiringType || !hiringTypes.includes(hiringType as never)) {
-			return NextResponse.json({ error: "A workspace name, company, and hiring type are required." }, { status: 400 });
+			return NextResponse.json({ error: "Workspace name and hiring type are required." }, { status: 400 });
 		}
 
 		const supabase = getSupabaseAdmin();

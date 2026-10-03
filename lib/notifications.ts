@@ -11,21 +11,7 @@ type ApplicantNotificationInput = {
 	message: string;
 };
 
-async function sendEmail({ from, to, subject, text, resendKey }: { from: string; to: string[]; subject: string; text: string; resendKey: string }) {
-	const response = await fetch("https://api.resend.com/emails", {
-		method: "POST",
-		headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-		body: JSON.stringify({ from, to, subject, text }),
-	});
-	if (!response.ok) {
-		const detail = await response.text();
-		throw new Error(`Email delivery failed with ${response.status}: ${detail.slice(0, 300)}`);
-	}
-	return response;
-}
-
 export async function notifyApplicant({
-	companyId,
 	applicantWhopId,
 	applicantEmail,
 	roleTitle,
@@ -34,21 +20,31 @@ export async function notifyApplicant({
 	note,
 	message,
 }: ApplicantNotificationInput) {
-	const content = [`Crewcall application update`, `Role: ${roleTitle}`, `Status: ${statusLabel}`, message, note?.trim() ? `Reviewer note: ${note.trim()}` : null, `View status: ${statusUrl}`].filter(Boolean).join("\n\n");
+	const content = [
+		"Crewcall application update",
+		`Role: ${roleTitle}`,
+		`Status: ${statusLabel}`,
+		message,
+		note?.trim() ? `Reviewer note: ${note.trim()}` : null,
+		`View status: ${statusUrl}`,
+	].filter(Boolean).join("\n\n");
 	const recipient = applicantWhopId || applicantEmail.trim().toLowerCase();
 	let dmResult: "success" | "error" | "no_whop_account_found" = "no_whop_account_found";
 
-	console.info("[APPLICANT NOTIFICATION PATH]", {
+	console.info("[APPLICANT WHOP DM PATH]", {
 		applicantWhopId: applicantWhopId || null,
 		whopIdFound: Boolean(applicantWhopId),
 		recipientType: applicantWhopId ? "user_id" : "email",
-		emailAttempted: true,
 		statusLabel,
 	});
 
 	if (recipient) {
 		try {
-			console.info("[APPLICANT WHOP DM CALL]", { applicantWhopId: applicantWhopId || null, recipientType: applicantWhopId ? "user_id" : "email", statusLabel });
+			console.info("[APPLICANT WHOP DM CALL]", {
+				applicantWhopId: applicantWhopId || null,
+				recipientType: applicantWhopId ? "user_id" : "email",
+				statusLabel,
+			});
 			const dmResponse = await fetch(`${process.env.WHOP_BASE_URL || "https://api.whop.com/api/v1"}/dm_channels`, {
 				method: "POST",
 				headers: {
@@ -68,45 +64,65 @@ export async function notifyApplicant({
 				await getWhopSdk().messages.create({ channel_id: channel.id, content });
 				dmResult = "success";
 			}
-			console.info("[APPLICANT WHOP DM RESULT]", { applicantWhopId: applicantWhopId || null, recipientType: applicantWhopId ? "user_id" : "email", result: dmResult, statusLabel });
+			console.info("[APPLICANT WHOP DM RESULT]", {
+				applicantWhopId: applicantWhopId || null,
+				recipientType: applicantWhopId ? "user_id" : "email",
+				result: dmResult,
+				statusLabel,
+			});
 		} catch (error) {
 			dmResult = "error";
-			console.error("[APPLICANT WHOP DM RESULT]", { applicantWhopId: applicantWhopId || null, recipientType: applicantWhopId ? "user_id" : "email", result: dmResult, statusLabel, error: error instanceof Error ? error.message : "Unknown error" });
+			console.error("[APPLICANT WHOP DM RESULT]", {
+				applicantWhopId: applicantWhopId || null,
+				recipientType: applicantWhopId ? "user_id" : "email",
+				result: dmResult,
+				statusLabel,
+				error: error instanceof Error ? error.message : "Unknown error",
+			});
 		}
 	}
 
-	const resendKey = process.env.RESEND_API_KEY;
-	const from = process.env.NOTIFICATION_FROM_EMAIL;
-	console.info("[APPLICANT EMAIL SEND]", { applicantEmail, statusLabel, reason: dmResult === "success" ? "whop_dm_plus_email" : dmResult });
-	if (!resendKey || !from) {
-		console.error("[APPLICANT EMAIL UNCONFIGURED]", { applicantEmail, statusLabel, reason: "Set RESEND_API_KEY and NOTIFICATION_FROM_EMAIL." });
-		return { delivered: false, channel: dmResult === "success" ? "whop_dm_plus_email" as const : "email" as const, dmResult };
-	}
-	await sendEmail({ from, to: [applicantEmail], subject: `${roleTitle}: ${statusLabel}`, text: content, resendKey });
-	console.info("[APPLICANT EMAIL RESULT]", { applicantEmail, statusLabel, result: "success" });
-	return { delivered: true, channel: dmResult === "success" ? "whop_dm_plus_email" as const : "email" as const, dmResult };
+	return { delivered: dmResult === "success", channel: "whop_dm" as const, dmResult };
 }
 
-export async function notifyWorkspaceAdmins({ companyId, roleTitle, applicantEmail, statusUrl }: { companyId: string; roleTitle: string; applicantEmail: string; statusUrl: string }) {
-	const resendKey = process.env.RESEND_API_KEY;
-	const from = process.env.NOTIFICATION_FROM_EMAIL;
-	if (!resendKey || !from) {
-		console.error("[AGENCY APPLICATION ALERT UNCONFIGURED]", { companyId, reason: "Set RESEND_API_KEY and NOTIFICATION_FROM_EMAIL." });
-		return { delivered: false, recipients: [] as string[] };
-	}
+export async function notifyWorkspaceAdminsDm({ companyId, roleTitle, applicantEmail, statusUrl }: { companyId: string; roleTitle: string; applicantEmail: string; statusUrl: string }) {
 	const admins = await getWhopSdk().members.list({ company_id: companyId, access_level: "admin", first: 100 });
-	const recipients = [...new Set(admins.data.map((member) => member.user?.email?.trim().toLowerCase()).filter((email): email is string => Boolean(email)))];
+	const recipients = [...new Set(admins.data.map((member) => member.user?.id).filter((id): id is string => Boolean(id)))];
 	if (!recipients.length) {
-		console.error("[AGENCY APPLICATION ALERT NO_RECIPIENT]", { companyId, adminCount: admins.data.length });
-		return { delivered: false, recipients };
+		console.error("[AGENCY WHOP DM NO_RECIPIENT]", { companyId, adminCount: admins.data.length });
+		return { delivered: false, recipientCount: 0 };
 	}
-	await sendEmail({
-		from,
-		to: recipients,
-		subject: `New application for ${roleTitle}`,
-		text: `A new application was submitted for ${roleTitle}.\n\nApplicant email: ${applicantEmail}\n\nReview it in Crewcall:\n${statusUrl}`,
-		resendKey,
-	});
-	console.info("[AGENCY APPLICATION ALERT SENT]", { companyId, recipients, roleTitle });
-	return { delivered: true, recipients };
+	let delivered = 0;
+	for (const recipient of recipients) {
+		try {
+			const channelResponse = await fetch(`${process.env.WHOP_BASE_URL || "https://api.whop.com/api/v1"}/dm_channels`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${process.env.WHOP_API_KEY || ""}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ with_user_ids: [recipient], notifications_enabled: true }),
+			});
+			if (!channelResponse.ok) {
+				const detail = await channelResponse.text();
+				throw new Error(`Whop DM channel creation failed with ${channelResponse.status}: ${detail.slice(0, 300)}`);
+			}
+			const channel = (await channelResponse.json()) as { id?: string };
+			if (!channel.id) throw new Error("Whop DM channel response did not include a channel ID.");
+			await getWhopSdk().messages.create({
+				channel_id: channel.id,
+				content: `New application for ${roleTitle}.\n\nApplicant email: ${applicantEmail}\n\nReview it in Crewcall:\n${statusUrl}`,
+			});
+			delivered += 1;
+		} catch (error) {
+			console.error("[AGENCY WHOP DM RESULT]", {
+				companyId,
+				recipient,
+				result: "error",
+				error: error instanceof Error ? error.message : "Unknown error",
+			});
+		}
+	}
+	console.info("[AGENCY WHOP DM RESULT]", { companyId, recipientCount: recipients.length, delivered });
+	return { delivered: delivered > 0, recipientCount: recipients.length };
 }
