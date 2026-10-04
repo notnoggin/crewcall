@@ -48,7 +48,7 @@ export async function notifyApplicant({
 			const dmResponse = await fetch(`${process.env.WHOP_BASE_URL || "https://api.whop.com/api/v1"}/dm_channels`, {
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${process.env.WHOP_API_KEY || ""}`,
+                    Authorization: `Bearer ${process.env.WHOP_API_KEY || ""}`,
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({ with_user_ids: [recipient], notifications_enabled: true }),
@@ -98,7 +98,7 @@ export async function notifyWorkspaceAdminsDm({ companyId, roleTitle, applicantE
 			const channelResponse = await fetch(`${process.env.WHOP_BASE_URL || "https://api.whop.com/api/v1"}/dm_channels`, {
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${process.env.WHOP_API_KEY || ""}`,
+                    Authorization: `Bearer ${process.env.WHOP_API_KEY || ""}`,
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({ with_user_ids: [recipient], notifications_enabled: true }),

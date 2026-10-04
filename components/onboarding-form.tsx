@@ -41,16 +41,19 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 	}
 
 	return (
-		<form onSubmit={submit} className="mx-auto flex max-w-xl flex-col gap-8 premium-surface p-6 sm:p-8">
-			<div>
-				<p className="page-kicker">
-					Welcome to Crewcall
-				</p>
-				<h1 className="page-title">What are you hiring for?</h1>
-				<p className="page-subtitle">
-					We&apos;ll tailor your first application template to get you moving.
-				</p>
+		<div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.85fr)] lg:items-start">
+			<div className="grid gap-4">
+				<div className="premium-surface p-6 sm:p-8">
+					<p className="page-kicker">Welcome to Crewcall</p>
+					<h1 className="page-title">What are you hiring for?</h1>
+					<p className="page-subtitle">We&apos;ll tailor your first application template to get you moving.</p>
+				</div>
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+					<OnboardingPreview image="/onboarding-home.png" alt="Crewcall home dashboard" title="See the whole hiring desk at a glance." />
+					<OnboardingPreview image="/onboarding-bench.png" alt="Crewcall bench dashboard" title="Keep approved people ready for the next campaign." />
+				</div>
 			</div>
+			<form onSubmit={submit} className="flex flex-col gap-8 premium-surface p-6 sm:p-8">
 			<label className="grid gap-2 text-3 font-medium text-gray-11">
 				Workspace name
 				<input required value={workspaceName} onChange={(event) => setWorkspaceName(event.target.value)} placeholder="e.g. Acme Media" className="premium-control px-4 py-3 text-4" />
@@ -86,6 +89,11 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 			<Button type="submit" variant="classic" size="4" disabled={saving}>
 				{saving ? "Setting up..." : "Continue"}
 			</Button>
-		</form>
+			</form>
+		</div>
 	);
+}
+
+function OnboardingPreview({ image, alt, title }: { image: string; alt: string; title: string }) {
+	return <figure className="premium-surface overflow-hidden p-3"><img src={image} alt={alt} className="aspect-[16/9] w-full rounded-xl border border-gray-a4 object-cover object-top" /><figcaption className="px-2 pb-1 pt-3 text-3 font-medium text-gray-11">{title}</figcaption></figure>;
 }
