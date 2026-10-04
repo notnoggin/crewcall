@@ -91,7 +91,7 @@ export async function notifyWorkspaceAdminsDm({ companyId, roleTitle, applicantE
 const authorizedUsers = await getWhopSdk().authorizedUsers.list({ company_id: companyId, first: 100 });
 const recipients = [...new Set(authorizedUsers.data.map((entry) => entry.user?.id).filter((id): id is string => Boolean(id)))];
 	if (!recipients.length) {
-		console.error("[AGENCY WHOP DM NO_RECIPIENT]", { companyId, adminCount: admins.data.length });
+		console.error("[AGENCY WHOP DM NO_RECIPIENT]", { companyId, adminCount: authorizedUsers.data.length });
 		return { delivered: false, recipientCount: 0 };
 	}
 	let delivered = 0;
