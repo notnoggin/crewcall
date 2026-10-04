@@ -86,8 +86,10 @@ export async function notifyApplicant({
 }
 
 export async function notifyWorkspaceAdminsDm({ companyId, roleTitle, applicantEmail, statusUrl }: { companyId: string; roleTitle: string; applicantEmail: string; statusUrl: string }) {
-	const admins = await getWhopSdk().members.list({ company_id: companyId, access_level: "admin", first: 100 });
-	const recipients = [...new Set(admins.data.map((member) => member.user?.id).filter((id): id is string => Boolean(id)))];
+	// Agency staff/owners are "authorized users" of a company, not "members" (members.list returns
+// customers of the company, which is the wrong population for "who runs this agency").
+const authorizedUsers = await getWhopSdk().authorizedUsers.list({ company_id: companyId, first: 100 });
+const recipients = [...new Set(authorizedUsers.data.map((entry) => entry.user?.id).filter((id): id is string => Boolean(id)))];
 	if (!recipients.length) {
 		console.error("[AGENCY WHOP DM NO_RECIPIENT]", { companyId, adminCount: admins.data.length });
 		return { delivered: false, recipientCount: 0 };
