@@ -1,0 +1,9 @@
+// Global: ~/.cursor/mcp.json (or per project: .cursor/mcp.json)
+{
+	"mcpServers": {
+		"whop": {
+			"type": "http",
+			"url": "https://mcp.whop.com/mcp"
+		}
+	}
+}
