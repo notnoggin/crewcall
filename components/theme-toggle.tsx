@@ -15,25 +15,39 @@ export function ThemeToggle() {
 		setTheme(nextTheme);
 	}, []);
 
-	function toggleTheme() {
-		const nextTheme = theme === "dark" ? "light" : "dark";
-		document.documentElement.dataset.theme = nextTheme;
-		window.localStorage.setItem("crewcall-theme", nextTheme);
-		setTheme(nextTheme);
+	function setMode(next: Theme) {
+		if (next === theme) return;
+		document.documentElement.dataset.theme = next;
+		window.localStorage.setItem("crewcall-theme", next);
+		setTheme(next);
 	}
 
 	return (
-		<button
-			type="button"
-			onClick={toggleTheme}
-			className="theme-toggle"
-			aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-			title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-		>
-			<span aria-hidden="true" className="theme-toggle-icon">
-				{theme === "dark" ? "☀" : "☾"}
-			</span>
-			<span className="theme-toggle-label">{theme === "dark" ? "Light" : "Dark"}</span>
-		</button>
+		<div className="theme-switch" role="group" aria-label="Color theme">
+			<button
+				type="button"
+				className={`theme-switch-option ${theme === "light" ? "is-active" : ""}`}
+				onClick={() => setMode("light")}
+				aria-pressed={theme === "light"}
+				title="Light mode"
+			>
+				<span aria-hidden="true" className="theme-switch-icon">
+					☀
+				</span>
+				<span className="theme-switch-label">Light</span>
+			</button>
+			<button
+				type="button"
+				className={`theme-switch-option ${theme === "dark" ? "is-active" : ""}`}
+				onClick={() => setMode("dark")}
+				aria-pressed={theme === "dark"}
+				title="Dark mode"
+			>
+				<span aria-hidden="true" className="theme-switch-icon">
+					☾
+				</span>
+				<span className="theme-switch-label">Dark</span>
+			</button>
+		</div>
 	);
 }
