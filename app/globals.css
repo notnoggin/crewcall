@@ -267,8 +267,8 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 button:focus-visible {
-	border-color: var(--accent-9);
-	box-shadow: 0 0 0 3px var(--accent-a3);
+	border-color: var(--gray-12);
+	box-shadow: 0 0 0 3px var(--gray-a4);
 	outline: none;
 }
 
@@ -289,8 +289,8 @@ button:focus-visible {
 }
 
 .button-link:hover {
-	border-color: var(--accent-9);
-	background: var(--accent-a3);
+	border-color: var(--gray-a6);
+	background: var(--gray-a4);
 	color: var(--gray-12);
 	transform: translateY(-1px);
 }
@@ -304,7 +304,7 @@ button:focus-visible {
 	border-radius: 7px !important;
 	background: transparent !important;
 	padding: 2px 0 !important;
-	color: var(--accent-11) !important;
+	color: var(--gray-11) !important;
 	font-size: 13px;
 	font-weight: 700;
 	line-height: 1.35;
@@ -313,7 +313,7 @@ button:focus-visible {
 }
 
 .status-recovery-link:hover:not(:disabled) {
-	background: var(--accent-a3) !important;
+	background: var(--gray-a3) !important;
 	padding: 2px 7px !important;
 	transform: none !important;
 	box-shadow: none !important;
@@ -324,7 +324,8 @@ button:focus-visible {
 	opacity: 0.65;
 }
 
-button:not(.theme-toggle):not(.field-remove) {
+/* Primary action buttons only — choice cards use .onboarding-choice */
+button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link) {
 	border: 1px solid #18181b;
 	border-radius: 10px;
 	background: #18181b;
@@ -333,7 +334,7 @@ button:not(.theme-toggle):not(.field-remove) {
 	transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
-button:not(.theme-toggle):not(.field-remove):hover:not(:disabled) {
+button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):hover:not(:disabled) {
 	border-color: #000000;
 	background: #000000;
 	color: #ffffff;
@@ -341,22 +342,103 @@ button:not(.theme-toggle):not(.field-remove):hover:not(:disabled) {
 	box-shadow: 0 5px 14px rgba(0, 0, 0, 0.16);
 }
 
-button:not(.theme-toggle):not(.field-remove):disabled {
+button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):disabled {
 	cursor: not-allowed;
 	opacity: 0.55;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.field-remove) {
+[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link) {
 	border-color: #ffffff;
 	background: #ffffff;
 	color: #18181b;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):hover:not(:disabled) {
+[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):hover:not(:disabled) {
 	border-color: #e4e4e7;
 	background: #e4e4e7;
 	color: #09090b;
 	box-shadow: 0 5px 16px rgba(0, 0, 0, 0.28);
+}
+
+/* Onboarding / selectable choice cards — not primary black buttons */
+.onboarding-choice {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	width: 100%;
+	padding: 14px 16px;
+	border: 1.5px solid var(--gray-a5) !important;
+	border-radius: 14px !important;
+	background: var(--gray-a2) !important;
+	color: var(--gray-12) !important;
+	font-weight: 500 !important;
+	text-align: left;
+	cursor: pointer;
+	user-select: none;
+	box-shadow: none !important;
+	transform: none !important;
+	transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.onboarding-choice:hover {
+	border-color: var(--gray-a6) !important;
+	background: var(--gray-1) !important;
+	color: var(--gray-12) !important;
+	transform: none !important;
+	box-shadow: none !important;
+}
+
+.onboarding-choice:focus-visible {
+	outline: none;
+	border-color: var(--gray-12) !important;
+	box-shadow: 0 0 0 3px var(--gray-a4) !important;
+}
+
+.onboarding-choice-selected {
+	border-color: var(--gray-12) !important;
+	background: var(--gray-a3) !important;
+	box-shadow: inset 0 0 0 1px var(--gray-12) !important;
+}
+
+.onboarding-choice-selected:hover {
+	border-color: var(--gray-12) !important;
+	background: var(--gray-a3) !important;
+}
+
+.onboarding-choice-compact {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 2px;
+	padding: 12px 14px;
+}
+
+.onboarding-choice-radio {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	margin-top: 2px;
+	border: 1.5px solid var(--gray-a6);
+	border-radius: 999px;
+	background: var(--gray-1);
+}
+
+.onboarding-choice-selected .onboarding-choice-radio {
+	border-color: var(--gray-12);
+	background: var(--gray-12);
+}
+
+.onboarding-choice-radio-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: #fff;
+}
+
+[data-theme="dark"] .onboarding-choice-radio-dot {
+	background: #18181b;
 }
 
 .queue-applicant-card,
@@ -385,8 +467,8 @@ button:not(.theme-toggle):not(.field-remove):disabled {
 
 .status-pill[data-status="open"],
 .status-pill[data-status="active"] {
-	background: var(--accent-a3);
-	color: var(--accent-11);
+	background: var(--gray-a4);
+	color: var(--gray-11);
 }
 
 .status-pill[data-status="draft"],
@@ -492,7 +574,7 @@ button:not(.theme-toggle):not(.field-remove):disabled {
 
 .roles-scroll-spy button.is-active span {
 	width: 20px;
-	background: var(--accent-9);
+	background: var(--gray-12);
 	opacity: 1;
 }
 
