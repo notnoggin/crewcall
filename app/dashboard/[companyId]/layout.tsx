@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { hasCrewcallAccess, CREWCALL_PRO_URL } from "@/lib/crewcall-access";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { isWorkspaceOnboarded } from "@/lib/workspace";
 
 export default async function DashboardLayout({
 	children,
@@ -9,17 +10,15 @@ export default async function DashboardLayout({
 	try {
 		const { companyId } = await params;
 
-		// Only treat the company as onboarded when a workspace exists AND has a name.
-		// (Older install webhooks could create a nameless row; those still need onboarding.)
 		const { data: workspace } = await getSupabaseAdmin()
 			.from("workspaces")
 			.select("id, name")
 			.eq("whop_company_id", companyId)
 			.maybeSingle();
 
-		const isOnboarded = Boolean(workspace?.name?.trim());
-
-		if (!isOnboarded) {
+		// Only gate after the user has completed onboarding (set a real workspace name).
+		// Default DB name "Crewcall workspace" means they have NOT onboarded yet.
+		if (!isWorkspaceOnboarded(workspace)) {
 			return children;
 		}
 
@@ -94,17 +93,8 @@ export default async function DashboardLayout({
 		}
 	} catch (error) {
 		console.error("Crewcall access check failed:", error);
-		return (
-			<main className="min-h-screen px-5 py-16">
-				<div className="mx-auto max-w-xl rounded-3xl border border-red-a5 bg-red-a2 p-8 text-center">
-					<h1 className="text-7 font-bold text-gray-12">Access check unavailable</h1>
-					<p className="mt-3 text-4 text-gray-10">
-						We could not verify your Crewcall Pro membership. Please try again in a
-						moment.
-					</p>
-				</div>
-			</main>
-		);
+		// Fail open to the page (onboarding) rather than blocking the whole app.
+		return children;
 	}
 
 	return children;

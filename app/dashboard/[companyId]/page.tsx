@@ -6,6 +6,7 @@ import { RoleCard } from "@/components/role-card";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getWhopSdk } from "@/lib/whop-sdk";
+import { isWorkspaceOnboarded } from "@/lib/workspace";
 
 export default async function DashboardPage({ params }: { params: Promise<{ companyId: string }> }) {
 	const { companyId } = await params;
@@ -25,8 +26,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 		.eq("whop_company_id", companyId)
 		.maybeSingle();
 
-	// Nameless rows (from old install webhooks) still need onboarding.
-	if (!workspace || !workspace.name?.trim()) {
+	// No workspace, or only the DB default name → show onboarding first.
+	if (!isWorkspaceOnboarded(workspace)) {
 		return (
 			<main className="min-h-screen px-5 py-16">
 				<OnboardingForm companyId={companyId} />
@@ -40,17 +41,17 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 			.select(
 				"id, title, type, description, status, capacity, intake_mode, seat_cap, platforms, pay_model, rate_offered, rate_currency, creator_name, niche, rules, start_date, deadline, applications(id, status), workspaces(name)",
 			)
-			.eq("workspace_id", workspace.id)
+			.eq("workspace_id", workspace!.id)
 			.order("created_at", { ascending: false }),
 		supabase
 			.from("roster_entries")
 			.select("id", { count: "exact", head: true })
-			.eq("workspace_id", workspace.id)
+			.eq("workspace_id", workspace!.id)
 			.neq("status", "dismissed"),
 		supabase
 			.from("roster_entries")
 			.select("id", { count: "exact", head: true })
-			.eq("workspace_id", workspace.id)
+			.eq("workspace_id", workspace!.id)
 			.eq("status", "bench"),
 	]);
 	const mapped = (roles || []).map((role) => ({
