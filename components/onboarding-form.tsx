@@ -65,12 +65,12 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 				</div>
 				<div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-1">
 					<OnboardingPreview
-						image="/onboarding-home.svg"
+						image="/onboarding-home.png"
 						alt="Crewcall home dashboard"
 						title="Your whole hiring desk, in one glance."
 					/>
 					<OnboardingPreview
-						image="/onboarding-bench.svg"
+						image="/onboarding-bench.png"
 						alt="Crewcall bench dashboard"
 						title="Your ready-to-work crew, always on standby."
 					/>
@@ -179,7 +179,7 @@ function OnboardingPreview({
 			<img
 				src={image}
 				alt={alt}
-				className="aspect-[16/9] w-full rounded-xl border border-gray-a4 object-cover object-top"
+				className="aspect-[16/9] w-full rounded-xl border border-gray-a4 object-cover object-top bg-gray-a3"
 			/>
 			<figcaption className="px-2 pb-1 pt-3 text-3 font-medium text-gray-11">{title}</figcaption>
 		</figure>
