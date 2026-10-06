@@ -83,13 +83,13 @@ body {
 }
 
 a {
-	color: var(--accent-11);
+	color: var(--gray-11);
 	text-decoration: none;
 	transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
 a:hover {
-	color: var(--accent-10);
+	color: var(--gray-12);
 }
 
 button,
@@ -121,48 +121,55 @@ option {
 
 ::selection {
 	color: var(--gray-12);
-	background: var(--accent-a3);
+	background: var(--gray-a4);
 }
 
 .dashboard-shell {
-	max-width: 1360px;
+	max-width: 1120px;
 	margin: 0 auto;
-	padding: 28px 24px 64px;
+	padding: 24px 20px 72px;
 }
 
 .dashboard-nav {
 	position: sticky;
-	top: 16px;
+	top: 12px;
 	z-index: 10;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 48px;
-	padding: 8px;
+	gap: 12px;
+	margin-bottom: 40px;
+	padding: 6px 8px 6px 6px;
 	border: 1px solid var(--gray-a5);
-	border-radius: 16px;
+	border-radius: 14px;
 	background: var(--gray-a1);
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
 	backdrop-filter: blur(18px);
 }
 
 .nav-links {
 	display: flex;
 	align-items: center;
-	gap: 3px;
+	gap: 2px;
 	min-width: 0;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.nav-links::-webkit-scrollbar {
+	display: none;
 }
 
 .nav-link {
 	display: inline-flex;
 	align-items: center;
-	height: 36px;
-	padding: 0 13px;
-	border-radius: 10px;
+	height: 34px;
+	padding: 0 12px;
+	border-radius: 9px;
 	color: var(--gray-10);
 	font-size: 13px;
 	font-weight: 650;
+	white-space: nowrap;
 }
 
 .nav-link:hover,
@@ -177,14 +184,19 @@ option {
 
 .crewcall-logo-chip {
 	display: inline-flex;
-	height: 36px;
-	width: 36px;
+	height: 34px;
+	width: 34px;
 	align-items: center;
 	justify-content: center;
-	margin-right: 8px;
-	border-radius: 10px;
+	margin-right: 4px;
+	border-radius: 9px;
 	background: #fff;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+	flex-shrink: 0;
+}
+
+[data-theme="dark"] .crewcall-logo-chip {
+	background: #fff;
 }
 
 .crewcall-logo {
@@ -199,21 +211,27 @@ option {
 	display: inline-flex;
 	height: 34px;
 	align-items: center;
-	gap: 7px;
+	gap: 6px;
 	border: 1px solid var(--gray-a5);
-	border-radius: 10px;
+	border-radius: 9px;
 	background: var(--gray-a3);
-	padding: 0 11px;
+	padding: 0 10px;
 	color: var(--gray-10);
 	font-size: 12px;
 	font-weight: 700;
 	cursor: pointer;
+	flex-shrink: 0;
 }
 
 .theme-toggle:hover {
-	border-color: var(--accent-9);
-	background: var(--accent-a3);
+	border-color: var(--gray-a6);
+	background: var(--gray-a4);
 	color: var(--gray-12);
+}
+
+.theme-toggle-icon {
+	font-size: 13px;
+	line-height: 1;
 }
 
 .page-kicker {
@@ -225,31 +243,31 @@ option {
 }
 
 .page-title {
-	margin-top: 8px;
+	margin-top: 6px;
 	color: var(--gray-12);
-	font-size: clamp(2rem, 4vw, 3rem);
+	font-size: clamp(1.75rem, 3.5vw, 2.5rem);
 	font-weight: 760;
-	letter-spacing: -0.055em;
-	line-height: 1;
+	letter-spacing: -0.05em;
+	line-height: 1.05;
 }
 
 .page-subtitle {
-	margin-top: 12px;
-	max-width: 620px;
+	margin-top: 10px;
+	max-width: 540px;
 	color: var(--gray-10);
-	font-size: 15px;
-	line-height: 1.6;
+	font-size: 14px;
+	line-height: 1.55;
 }
 
 .premium-surface {
 	border: 1px solid var(--gray-a5);
 	border-radius: 16px;
 	background: var(--gray-a2);
-	box-shadow: 0 16px 45px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.06);
+	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] .premium-surface {
-	box-shadow: 0 20px 55px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .premium-control {
@@ -276,10 +294,10 @@ button:focus-visible {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 7px;
-	min-height: 36px;
+	gap: 6px;
+	min-height: 34px;
 	border: 1px solid var(--gray-a5);
-	border-radius: 10px;
+	border-radius: 9px;
 	background: var(--gray-a3);
 	padding: 0 12px;
 	color: var(--gray-11);
@@ -292,7 +310,62 @@ button:focus-visible {
 	border-color: var(--gray-a6);
 	background: var(--gray-a4);
 	color: var(--gray-12);
-	transform: translateY(-1px);
+}
+
+/* Secondary outline buttons (Share, Pause, Close, etc.) */
+.btn-secondary {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	min-height: 34px;
+	padding: 0 12px;
+	border: 1px solid var(--gray-a5) !important;
+	border-radius: 9px !important;
+	background: var(--gray-a2) !important;
+	color: var(--gray-12) !important;
+	font-size: 13px;
+	font-weight: 650 !important;
+	cursor: pointer;
+	box-shadow: none !important;
+	transform: none !important;
+}
+
+.btn-secondary:hover:not(:disabled) {
+	border-color: var(--gray-a6) !important;
+	background: var(--gray-1) !important;
+	color: var(--gray-12) !important;
+	transform: none !important;
+	box-shadow: none !important;
+}
+
+.btn-secondary:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.btn-ghost-danger {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	min-height: 34px;
+	padding: 0 12px;
+	border: 1px solid transparent !important;
+	border-radius: 9px !important;
+	background: transparent !important;
+	color: var(--red-10) !important;
+	font-size: 13px;
+	font-weight: 650 !important;
+	cursor: pointer;
+	box-shadow: none !important;
+	transform: none !important;
+}
+
+.btn-ghost-danger:hover:not(:disabled) {
+	background: var(--red-a2) !important;
+	border-color: transparent !important;
+	color: var(--red-10) !important;
+	transform: none !important;
+	box-shadow: none !important;
 }
 
 .status-recovery-link {
@@ -324,8 +397,8 @@ button:focus-visible {
 	opacity: 0.65;
 }
 
-/* Primary action buttons only — choice cards use .onboarding-choice */
-button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link) {
+/* Primary solid buttons only */
+button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
 	border: 1px solid #18181b;
 	border-radius: 10px;
 	background: #18181b;
@@ -334,33 +407,33 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
-button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):hover:not(:disabled) {
+button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
 	border-color: #000000;
 	background: #000000;
 	color: #ffffff;
 	transform: translateY(-1px);
-	box-shadow: 0 5px 14px rgba(0, 0, 0, 0.16);
+	box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14);
 }
 
-button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):disabled {
+button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):disabled {
 	cursor: not-allowed;
 	opacity: 0.55;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link) {
+[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
 	border-color: #ffffff;
 	background: #ffffff;
 	color: #18181b;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):hover:not(:disabled) {
+[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
 	border-color: #e4e4e7;
 	background: #e4e4e7;
 	color: #09090b;
 	box-shadow: 0 5px 16px rgba(0, 0, 0, 0.28);
 }
 
-/* Onboarding / selectable choice cards — not primary black buttons */
+/* Onboarding choice cards */
 .onboarding-choice {
 	display: flex;
 	align-items: flex-start;
@@ -458,7 +531,7 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	display: inline-flex;
 	align-items: center;
 	border-radius: 999px;
-	padding: 5px 9px;
+	padding: 4px 10px;
 	font-size: 11px;
 	font-weight: 750;
 	letter-spacing: 0.02em;
@@ -467,8 +540,8 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 
 .status-pill[data-status="open"],
 .status-pill[data-status="active"] {
-	background: var(--gray-a4);
-	color: var(--gray-11);
+	background: rgba(22, 163, 74, 0.12);
+	color: var(--green-10);
 }
 
 .status-pill[data-status="draft"],
@@ -490,8 +563,8 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	border: 1px solid var(--gray-a5);
 	border-radius: 14px;
 	background: var(--gray-a2);
-	box-shadow: 0 7px 22px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-	transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+	transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
 .role-filters {
@@ -499,33 +572,70 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	width: 100%;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
-	padding: 6px;
+	gap: 12px;
+	padding: 5px;
 	border: 1px solid var(--gray-a5);
-	border-radius: 14px;
+	border-radius: 12px;
 	background: var(--gray-a3);
+}
+
+.role-filters-label {
+	padding: 0 8px;
+	color: var(--gray-9);
+	font-size: 12px;
+	font-weight: 650;
+	white-space: nowrap;
 }
 
 .role-filter-group {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px;
+	gap: 3px;
+}
+
+.role-filter-chip {
+	display: inline-flex !important;
+	align-items: center;
+	min-height: 32px;
+	padding: 0 12px;
+	border: 0 !important;
+	border-radius: 8px !important;
+	background: transparent !important;
+	color: var(--gray-9) !important;
+	font-size: 13px;
+	font-weight: 650 !important;
+	cursor: pointer;
+	box-shadow: none !important;
+	transform: none !important;
+}
+
+.role-filter-chip:hover {
+	background: var(--gray-a4) !important;
+	color: var(--gray-12) !important;
+	transform: none !important;
+	box-shadow: none !important;
+}
+
+.role-filter-chip.is-active {
+	background: var(--gray-1) !important;
+	color: var(--gray-12) !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
 }
 
 .roles-scroll-spy {
 	position: fixed;
 	top: 50%;
-	right: max(18px, calc((100vw - 1360px) / 2 - 112px));
+	right: max(18px, calc((100vw - 1120px) / 2 - 112px));
 	z-index: 8;
 	display: grid;
-	width: 150px;
+	width: 148px;
 	gap: 3px;
 	transform: translateY(-50%);
 	padding: 10px 8px;
 	border: 1px solid var(--gray-a5);
 	border-radius: 14px;
 	background: var(--gray-a1);
-	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 	backdrop-filter: blur(16px);
 }
 
@@ -592,15 +702,14 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 }
 
 .metric-card {
-	padding: 18px;
+	padding: 16px 18px;
 }
 
 .action-card:hover,
 .role-card:hover {
 	border-color: var(--gray-a6);
 	background: var(--gray-1);
-	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
-	transform: translateY(-1px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 .table-shell {
@@ -654,14 +763,13 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 }
 
 .queue-applicant-card {
-	transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+	transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
 .queue-applicant-card:hover,
 .queue-applicant-card:focus-visible {
 	background: var(--gray-a2);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-	transform: translateY(-1px);
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 	outline: none;
 }
 
@@ -676,16 +784,13 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 
 @media (max-width: 640px) {
 	.dashboard-shell {
-		padding: 16px 16px 48px;
+		padding: 14px 14px 48px;
 	}
 	.dashboard-nav {
 		top: 8px;
-		margin-bottom: 32px;
+		margin-bottom: 28px;
 	}
-	.nav-link {
-		padding: 0 9px;
-	}
-	.nav-link span {
+	.theme-toggle-label {
 		display: none;
 	}
 }
