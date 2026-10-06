@@ -17,6 +17,10 @@ const HIRING_HINTS: Record<HiringType, string> = {
 	custom: "Start with a blank role template",
 };
 
+// Current product screenshots (home + bench)
+const ONBOARDING_HOME_IMG = "https://i.imgur.com/bEBOJpQ.jpeg";
+const ONBOARDING_BENCH_IMG = "https://i.imgur.com/Kak1m3K.jpeg";
+
 export function OnboardingForm({ companyId }: { companyId: string }) {
 	const [hiringType, setHiringType] = useState<HiringType>("clipper");
 	const [workspaceName, setWorkspaceName] = useState("");
@@ -65,12 +69,12 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 				</div>
 				<div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-1">
 					<OnboardingPreview
-						image="/onboarding-home.png"
+						image={ONBOARDING_HOME_IMG}
 						alt="Crewcall home dashboard"
 						title="Your whole hiring desk, in one glance."
 					/>
 					<OnboardingPreview
-						image="/onboarding-bench.png"
+						image={ONBOARDING_BENCH_IMG}
 						alt="Crewcall bench dashboard"
 						title="Your ready-to-work crew, always on standby."
 					/>
