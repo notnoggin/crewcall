@@ -27,10 +27,10 @@
 	--gray-a4: rgba(24, 24, 27, 0.055);
 	--gray-a5: rgba(24, 24, 27, 0.1);
 	--gray-a6: rgba(24, 24, 27, 0.16);
-	--accent-9: #3b82f6;
-	--accent-10: #2563eb;
-	--accent-11: #1d4ed8;
-	--accent-a3: rgba(59, 130, 246, 0.1);
+	--accent-9: #EE4B2B;
+	--accent-10: #d63f22;
+	--accent-11: #c4351c;
+	--accent-a3: rgba(238, 75, 43, 0.12);
 	--red-10: #dc2626;
 	--red-a2: rgba(220, 38, 38, 0.08);
 	--green-10: #15803d;
@@ -57,10 +57,10 @@
 	--gray-a4: rgba(255, 255, 255, 0.06);
 	--gray-a5: rgba(255, 255, 255, 0.09);
 	--gray-a6: rgba(255, 255, 255, 0.14);
-	--accent-9: #3b82f6;
-	--accent-10: #2563eb;
-	--accent-11: #60a5fa;
-	--accent-a3: rgba(59, 130, 246, 0.16);
+	--accent-9: #EE4B2B;
+	--accent-10: #f06a50;
+	--accent-11: #ff7a5c;
+	--accent-a3: rgba(238, 75, 43, 0.18);
 	--red-10: #f87171;
 	--red-a2: rgba(248, 113, 113, 0.1);
 	--green-10: #4ade80;
@@ -121,10 +121,8 @@ option {
 
 ::selection {
 	color: var(--gray-12);
-	background: var(--gray-a4);
+	background: var(--accent-a3);
 }
-
-/* ── Layout ─────────────────────────────────────────── */
 
 .dashboard-shell {
 	max-width: 1080px;
@@ -148,8 +146,6 @@ option {
 	letter-spacing: -0.03em;
 	line-height: 1.2;
 }
-
-/* ── Nav ────────────────────────────────────────────── */
 
 .dashboard-nav {
 	position: sticky;
@@ -192,6 +188,7 @@ option {
 }
 
 .nav-link {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
 	height: 34px;
@@ -211,6 +208,18 @@ option {
 
 .nav-link[data-active="true"] {
 	box-shadow: inset 0 0 0 1px var(--gray-a5);
+}
+
+.nav-link[data-active="true"]::after {
+	content: "";
+	position: absolute;
+	bottom: 5px;
+	left: 50%;
+	width: 14px;
+	height: 2px;
+	transform: translateX(-50%);
+	border-radius: 999px;
+	background: var(--accent-9);
 }
 
 .crewcall-logo-chip {
@@ -234,34 +243,65 @@ option {
 	transform: scale(1.04);
 }
 
-.theme-toggle {
+.theme-switch {
 	display: inline-flex;
-	height: 34px;
 	align-items: center;
-	gap: 6px;
+	gap: 2px;
+	padding: 3px;
 	border: 1px solid var(--gray-a5);
-	border-radius: 10px;
+	border-radius: 12px;
 	background: var(--gray-a3);
-	padding: 0 10px;
-	color: var(--gray-10);
-	font-size: 12px;
-	font-weight: 700;
-	cursor: pointer;
 	flex-shrink: 0;
+	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
 }
 
-.theme-toggle:hover {
-	border-color: var(--gray-a6);
-	background: var(--gray-a4);
-	color: var(--gray-12);
+[data-theme="dark"] .theme-switch {
+	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 }
 
-.theme-toggle-icon {
+.theme-switch-option {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	min-height: 30px;
+	padding: 0 10px;
+	border: 0 !important;
+	border-radius: 9px !important;
+	background: transparent !important;
+	color: var(--gray-9) !important;
+	font-size: 12px;
+	font-weight: 650 !important;
+	cursor: pointer;
+	box-shadow: none !important;
+	transform: none !important;
+}
+
+.theme-switch-option:hover {
+	color: var(--gray-12) !important;
+	background: var(--gray-a4) !important;
+	transform: none !important;
+	box-shadow: none !important;
+}
+
+.theme-switch-option.is-active {
+	background: var(--gray-1) !important;
+	color: var(--gray-12) !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.theme-switch-option.is-active .theme-switch-icon {
+	color: var(--accent-9);
+}
+
+.theme-switch-icon {
 	font-size: 13px;
 	line-height: 1;
 }
 
-/* ── Typography ─────────────────────────────────────── */
+.theme-toggle {
+	display: none;
+}
 
 .page-kicker {
 	color: var(--gray-9);
@@ -287,8 +327,6 @@ option {
 	font-size: 14px;
 	line-height: 1.55;
 }
-
-/* ── Premium surfaces (onboarding-matched) ──────────── */
 
 .premium-surface {
 	border: 1px solid var(--gray-a5);
@@ -323,7 +361,7 @@ select:focus-visible,
 textarea:focus-visible,
 button:focus-visible {
 	border-color: var(--gray-12);
-	box-shadow: 0 0 0 3px var(--gray-a4);
+	box-shadow: 0 0 0 3px var(--accent-a3);
 	outline: none;
 	background: var(--gray-a2);
 }
@@ -349,8 +387,6 @@ button:focus-visible {
 	background: var(--gray-1);
 	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
 }
-
-/* ── Buttons ────────────────────────────────────────── */
 
 .button-link {
 	display: inline-flex;
@@ -458,7 +494,7 @@ button:focus-visible {
 	opacity: 0.65;
 }
 
-button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
+button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
 	border: 1px solid #18181b;
 	border-radius: 11px;
 	background: #18181b;
@@ -467,7 +503,7 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
-button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
+button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
 	border-color: #000000;
 	background: #000000;
 	color: #ffffff;
@@ -475,25 +511,23 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
 }
 
-button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):disabled {
+button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):disabled {
 	cursor: not-allowed;
 	opacity: 0.55;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
+[data-theme="dark"] button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
 	border-color: #ffffff;
 	background: #ffffff;
 	color: #18181b;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
+[data-theme="dark"] button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
 	border-color: #e4e4e7;
 	background: #e4e4e7;
 	color: #09090b;
 	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 }
-
-/* ── Onboarding choices ─────────────────────────────── */
 
 .onboarding-choice {
 	display: flex;
@@ -525,7 +559,7 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 .onboarding-choice:focus-visible {
 	outline: none;
 	border-color: var(--gray-12) !important;
-	box-shadow: 0 0 0 3px var(--gray-a4) !important;
+	box-shadow: 0 0 0 3px var(--accent-a3) !important;
 }
 
 .onboarding-choice-selected {
@@ -560,8 +594,8 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 }
 
 .onboarding-choice-selected .onboarding-choice-radio {
-	border-color: var(--gray-12);
-	background: var(--gray-12);
+	border-color: var(--accent-9);
+	background: var(--accent-9);
 }
 
 .onboarding-choice-radio-dot {
@@ -574,8 +608,6 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 [data-theme="dark"] .onboarding-choice-radio-dot {
 	background: #18181b;
 }
-
-/* ── Cards ──────────────────────────────────────────── */
 
 .metric-card {
 	padding: 18px 20px;
@@ -697,8 +729,6 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	color: var(--gray-9);
 }
 
-/* ── Filters ────────────────────────────────────────── */
-
 .role-filters-wrap {
 	padding: 6px;
 }
@@ -754,7 +784,17 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
 }
 
-/* ── Scroll spy / tables / drawers ──────────────────── */
+.form-section {
+	padding: 24px 26px;
+}
+
+.form-field-slot {
+	position: relative;
+	padding: 18px 18px 18px 16px;
+	border: 1px solid var(--gray-a4);
+	border-radius: 14px;
+	background: var(--gray-a3);
+}
 
 .roles-scroll-spy {
 	position: fixed;
@@ -818,7 +858,7 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 
 .roles-scroll-spy button.is-active span {
 	width: 20px;
-	background: var(--gray-12);
+	background: var(--accent-9);
 	opacity: 1;
 }
 
@@ -914,7 +954,7 @@ button:not(.theme-toggle):not(.field-remove):not(.onboarding-choice):not(.nav-li
 		top: 8px;
 		margin-bottom: 28px;
 	}
-	.theme-toggle-label {
+	.theme-switch-label {
 		display: none;
 	}
 	.role-filters {
