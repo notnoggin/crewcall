@@ -841,25 +841,21 @@ button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onbo
 }
 
 .roles-scroll-spy button:hover,
-.roles-scroll-spy button.is-active {
+.roles-scroll-spy button[data-active="true"] {
 	background: var(--gray-a4) !important;
-	color: var(--gray-12) !important;
-	transform: none !important;
-	box-shadow: none !important;
+	color: var(--gray-12);
 }
 
-.roles-scroll-spy button span {
-	width: 14px;
-	height: 1px;
-	flex: 0 0 auto;
-	background: currentColor;
-	opacity: 0.55;
+.roles-scroll-spy-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: var(--gray-a5);
+	flex-shrink: 0;
 }
 
-.roles-scroll-spy button.is-active span {
-	width: 20px;
+.roles-scroll-spy button[data-active="true"] .roles-scroll-spy-dot {
 	background: var(--accent-9);
-	opacity: 1;
 }
 
 .table-shell {
@@ -980,4 +976,43 @@ button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onbo
 		animation-duration: 0.01ms !important;
 		transition-duration: 0.01ms !important;
 	}
+}
+
+/* Paywall primary CTA — must beat global `a { color: gray-11 }` */
+.paywall-cta {
+	display: inline-flex;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+	min-height: 48px;
+	padding: 0 20px;
+	border: 1px solid #18181b;
+	border-radius: 12px;
+	background: #18181b;
+	color: #ffffff !important;
+	font-size: 15px;
+	font-weight: 700;
+	text-decoration: none;
+	transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.paywall-cta:hover {
+	border-color: #000000;
+	background: #000000;
+	color: #ffffff !important;
+	transform: translateY(-1px);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+}
+
+[data-theme="dark"] .paywall-cta {
+	border-color: #ffffff;
+	background: #ffffff;
+	color: #18181b !important;
+}
+
+[data-theme="dark"] .paywall-cta:hover {
+	border-color: #e4e4e7;
+	background: #e4e4e7;
+	color: #09090b !important;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 }
