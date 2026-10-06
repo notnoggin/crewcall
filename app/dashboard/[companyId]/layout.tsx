@@ -73,12 +73,7 @@ export default async function DashboardLayout({
 							</ul>
 
 							<div className="mt-8">
-								<Link
-									href={CREWCALL_PRO_URL}
-									target="_blank"
-									rel="noreferrer"
-									className="inline-flex w-full items-center justify-center rounded-xl border border-gray-12 bg-gray-12 px-5 py-3.5 text-4 font-semibold text-white transition hover:bg-gray-11"
-								>
+								<Link href={CREWCALL_PRO_URL} target="_blank" rel="noreferrer" className="paywall-cta">
 									Start free 3-day trial
 								</Link>
 							</div>
