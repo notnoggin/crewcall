@@ -65,20 +65,19 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 				</div>
 				<div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-1">
 					<OnboardingPreview
-						image="/onboarding-home.png"
+						image="/onboarding-home.svg"
 						alt="Crewcall home dashboard"
-						title="See the whole hiring desk at a glance."
+						title="Your whole hiring desk, in one glance."
 					/>
 					<OnboardingPreview
-						image="/onboarding-bench.png"
+						image="/onboarding-bench.svg"
 						alt="Crewcall bench dashboard"
-						title="Keep approved people ready for the next campaign."
+						title="Your ready-to-work crew, always on standby."
 					/>
 				</div>
 			</div>
 
 			<form onSubmit={submit} className="flex flex-col gap-7 premium-surface p-6 sm:p-8">
-				{/* Workspace name */}
 				<label className="grid gap-2 text-3 font-medium text-gray-11">
 					Workspace name
 					<input
@@ -94,7 +93,6 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 					</span>
 				</label>
 
-				{/* Hiring type templates */}
 				<div className="grid gap-3">
 					<p className="text-3 font-medium text-gray-11">Role template</p>
 					<div className="grid gap-2.5 sm:grid-cols-2" role="radiogroup" aria-label="Role template">
@@ -112,9 +110,7 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 									}`}
 								>
 									<span className="onboarding-choice-radio" aria-hidden="true">
-										{selected ? (
-											<span className="onboarding-choice-radio-dot" />
-										) : null}
+										{selected ? <span className="onboarding-choice-radio-dot" /> : null}
 									</span>
 									<span className="min-w-0 flex-1">
 										<span className="block text-4 font-semibold text-gray-12">
@@ -130,7 +126,6 @@ export function OnboardingForm({ companyId }: { companyId: string }) {
 					</div>
 				</div>
 
-				{/* Starter roles */}
 				<div className="grid gap-3">
 					<div>
 						<p className="text-3 font-medium text-gray-11">Start with a role template</p>
