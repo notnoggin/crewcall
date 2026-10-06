@@ -9,15 +9,17 @@ export default async function DashboardLayout({
 	try {
 		const { companyId } = await params;
 
-		// First visit for a company: no workspace yet → always show onboarding.
-		// Membership is only required after the workspace has been created.
+		// Only treat the company as onboarded when a workspace exists AND has a name.
+		// (Older install webhooks could create a nameless row; those still need onboarding.)
 		const { data: workspace } = await getSupabaseAdmin()
 			.from("workspaces")
-			.select("id")
+			.select("id, name")
 			.eq("whop_company_id", companyId)
 			.maybeSingle();
 
-		if (!workspace) {
+		const isOnboarded = Boolean(workspace?.name?.trim());
+
+		if (!isOnboarded) {
 			return children;
 		}
 
@@ -27,7 +29,6 @@ export default async function DashboardLayout({
 			return (
 				<main className="min-h-screen px-5 py-16">
 					<div className="mx-auto flex max-w-lg flex-col items-center text-center">
-						{/* Logo chip */}
 						<div className="crewcall-logo-chip mb-8">
 							<img
 								src="/crewcall-logo-modified.png"
@@ -37,7 +38,7 @@ export default async function DashboardLayout({
 						</div>
 
 						<div className="w-full rounded-3xl border border-gray-a5 bg-gray-a2 p-8 sm:p-10">
-							<p className="text-3 font-semibold uppercase tracking-[0.2em] text-accent-11">
+							<p className="text-3 font-semibold uppercase tracking-[0.2em] text-gray-9">
 								Crewcall Pro
 							</p>
 
@@ -53,19 +54,19 @@ export default async function DashboardLayout({
 
 							<ul className="mt-6 space-y-3 text-left text-3 text-gray-11">
 								<li className="flex items-start gap-3">
-									<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-a3 text-2 font-bold text-accent-11">
+									<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-a4 text-2 font-bold text-gray-11">
 										✓
 									</span>
 									<span>Role templates for clippers, mods, VAs &amp; custom hires</span>
 								</li>
 								<li className="flex items-start gap-3">
-									<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-a3 text-2 font-bold text-accent-11">
+									<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-a4 text-2 font-bold text-gray-11">
 										✓
 									</span>
 									<span>Application review queue &amp; bench management</span>
 								</li>
 								<li className="flex items-start gap-3">
-									<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-a3 text-2 font-bold text-accent-11">
+									<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-a4 text-2 font-bold text-gray-11">
 										✓
 									</span>
 									<span>Shareable apply links for every role</span>
@@ -77,7 +78,7 @@ export default async function DashboardLayout({
 									href={CREWCALL_PRO_URL}
 									target="_blank"
 									rel="noreferrer"
-									className="inline-flex w-full items-center justify-center rounded-xl bg-accent-9 px-5 py-3.5 text-4 font-semibold text-white transition hover:bg-accent-10"
+									className="inline-flex w-full items-center justify-center rounded-xl border border-gray-12 bg-gray-12 px-5 py-3.5 text-4 font-semibold text-white transition hover:bg-gray-11"
 								>
 									Start free 3-day trial
 								</Link>
