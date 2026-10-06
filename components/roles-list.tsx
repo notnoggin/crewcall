@@ -40,27 +40,31 @@ export function RolesList({ roles, companyId }: { roles: RoleWithStats[]; compan
 	}, [visible]);
 
 	function jumpToRole(roleId: string) {
-		document.getElementById(`role-section-${roleId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+		document
+			.getElementById(`role-section-${roleId}`)
+			?.scrollIntoView({ behavior: "smooth", block: "start" });
 		setActiveRoleId(roleId);
 	}
 
 	return (
 		<div className="relative grid gap-5">
-			<div className="role-filters">
-				<span className="role-filters-label">Filter</span>
-				<div className="role-filter-group" role="tablist" aria-label="Filter roles">
-					{FILTERS.map((item) => (
-						<button
-							key={item.id}
-							type="button"
-							role="tab"
-							aria-selected={filter === item.id}
-							onClick={() => setFilter(item.id)}
-							className={`role-filter-chip ${filter === item.id ? "is-active" : ""}`}
-						>
-							{item.label}
-						</button>
-					))}
+			<div className="premium-surface role-filters-wrap">
+				<div className="role-filters">
+					<span className="role-filters-label">Filter</span>
+					<div className="role-filter-group" role="tablist" aria-label="Filter roles">
+						{FILTERS.map((item) => (
+							<button
+								key={item.id}
+								type="button"
+								role="tab"
+								aria-selected={filter === item.id}
+								onClick={() => setFilter(item.id)}
+								className={`role-filter-chip ${filter === item.id ? "is-active" : ""}`}
+							>
+								{item.label}
+							</button>
+						))}
+					</div>
 				</div>
 			</div>
 
@@ -90,7 +94,8 @@ export function RolesList({ roles, companyId }: { roles: RoleWithStats[]; compan
 
 			{!visible.length ? (
 				<div className="premium-surface p-12 text-center">
-					<p className="text-5 font-semibold text-gray-12">Nothing here yet</p>
+					<p className="page-kicker">Empty</p>
+					<p className="section-title mt-2">Nothing here yet</p>
 					<p className="mt-2 text-3 text-gray-9">Try another filter or create your first role.</p>
 				</div>
 			) : null}

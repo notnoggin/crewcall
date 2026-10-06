@@ -55,18 +55,16 @@ export function RoleCard({ role, companyId }: { role: Role; companyId: string })
 	}
 
 	const intakeLabel =
-		role.intake_mode === "limited_seats"
-			? `${role.seat_cap ?? 0} seats`
-			: "Open bench";
+		role.intake_mode === "limited_seats" ? `${role.seat_cap ?? 0} seats` : "Open bench";
 
 	return (
-		<article className="role-card p-5 sm:p-6">
+		<article className="role-card">
 			<div className="flex items-start justify-between gap-4">
 				<div className="min-w-0">
 					<h3 className="text-5 font-semibold tracking-tight text-gray-12">{role.title}</h3>
-					<p className="mt-1 text-3 text-gray-9">
+					<p className="mt-1.5 text-3 text-gray-9">
 						<span className="capitalize">{role.type}</span>
-						<span className="mx-1.5 text-gray-a6">·</span>
+						<span className="mx-1.5 opacity-40">·</span>
 						{intakeLabel}
 					</p>
 				</div>
@@ -79,22 +77,22 @@ export function RoleCard({ role, companyId }: { role: Role; companyId: string })
 				<p className="mt-4 max-w-3xl text-3 leading-6 text-gray-10">{role.description}</p>
 			) : null}
 
-			<div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-3 text-gray-9">
-				<span>
-					<strong className="tabular-nums text-gray-12">{role.applicantCount ?? 0}</strong>{" "}
-					applicants
-				</span>
+			<div className="role-card-stats">
+				<div className="role-card-stat">
+					<span className="role-card-stat-value">{role.applicantCount ?? 0}</span>
+					<span className="role-card-stat-label">Applicants</span>
+				</div>
 				{role.intake_mode === "limited_seats" ? (
-					<span>
-						<strong className="tabular-nums text-gray-12">
-							{role.seatsFilled ?? 0} / {role.seat_cap}
-						</strong>{" "}
-						seats filled
-					</span>
+					<div className="role-card-stat">
+						<span className="role-card-stat-value">
+							{role.seatsFilled ?? 0}/{role.seat_cap}
+						</span>
+						<span className="role-card-stat-label">Seats filled</span>
+					</div>
 				) : null}
 			</div>
 
-			<div className="mt-5 flex flex-wrap items-center gap-2">
+			<div className="role-card-actions">
 				<button type="button" className="btn-secondary" disabled={busy} onClick={() => setShareOpen(true)}>
 					Share
 				</button>
@@ -116,7 +114,7 @@ export function RoleCard({ role, companyId }: { role: Role; companyId: string })
 				<button type="button" className="btn-ghost-danger" disabled={busy} onClick={() => action("DELETE")}>
 					Delete
 				</button>
-				<Link className="button-link ml-auto" href={`/dashboard/${companyId}/roles/${role.id}`}>
+				<Link className="button-link role-card-primary-link" href={`/dashboard/${companyId}/roles/${role.id}`}>
 					Review queue →
 				</Link>
 			</div>
@@ -157,7 +155,7 @@ export function RoleSharePanel({ role, onClose }: { role: Role; onClose?: () => 
 
 	const dialog = (
 		<div
-			className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 p-5 backdrop-blur-[2px]"
+			className="premium-overlay"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="share-role-title"
@@ -165,19 +163,19 @@ export function RoleSharePanel({ role, onClose }: { role: Role; onClose?: () => 
 				if (event.target === event.currentTarget) close();
 			}}
 		>
-			<div
-				className="w-full max-w-2xl rounded-3xl border border-gray-a5 bg-gray-1 p-6 shadow-2xl"
-				onMouseDown={(event) => event.stopPropagation()}
-			>
+			<div className="premium-modal" onMouseDown={(event) => event.stopPropagation()}>
 				<div className="flex items-center justify-between gap-4">
-					<h2 id="share-role-title" className="min-w-0 text-6 font-bold text-gray-12">
-						Share your role
-					</h2>
+					<div>
+						<p className="page-kicker">Share</p>
+						<h2 id="share-role-title" className="section-title mt-1">
+							Share your role
+						</h2>
+					</div>
 					<button type="button" className="btn-secondary" onClick={close}>
 						Close
 					</button>
 				</div>
-				<div className="mt-5 grid gap-4">
+				<div className="mt-6 grid gap-4">
 					<img
 						src="/crewcall-share-banner.png"
 						alt="Crewcall share banner"
@@ -185,7 +183,7 @@ export function RoleSharePanel({ role, onClose }: { role: Role; onClose?: () => 
 						height={630}
 						className="w-full rounded-2xl border border-gray-a5"
 					/>
-					<p className="text-3 text-gray-10">{caption}</p>
+					<p className="text-3 leading-6 text-gray-10">{caption}</p>
 					<div className="grid gap-2">
 						<label htmlFor="public-apply-link" className="text-3 font-semibold text-gray-12">
 							Public apply link

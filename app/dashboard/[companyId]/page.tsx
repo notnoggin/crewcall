@@ -26,7 +26,6 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 		.eq("whop_company_id", companyId)
 		.maybeSingle();
 
-	// No workspace, or only the DB default name → show onboarding first.
 	if (!isWorkspaceOnboarded(workspace)) {
 		return (
 			<main className="min-h-screen px-5 py-16">
@@ -84,7 +83,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 		<main className="dashboard-shell">
 			<div>
 				<DashboardNav companyId={companyId} />
-				<header className="mb-10 flex flex-wrap items-end justify-between gap-5">
+
+				<header className="page-header">
 					<div>
 						<p className="page-kicker">{greeting}</p>
 						<h1 className="page-title">Crewcall home</h1>
@@ -94,24 +94,31 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 						<Button size="3">＋ Create role</Button>
 					</Link>
 				</header>
+
 				{!mapped.length ? (
-					<section className="rounded-3xl border border-gray-a5 bg-gray-a2 p-8">
-						<h2 className="text-6 font-bold text-gray-12">Get your first bench moving</h2>
+					<section className="premium-surface p-6 sm:p-8">
+						<p className="page-kicker">Getting started</p>
+						<h2 className="section-title mt-2">Get your first bench moving</h2>
+						<p className="mt-2 text-3 text-gray-10">
+							Three calm steps to open your first hiring pipeline.
+						</p>
 						<div className="mt-6 grid gap-3 md:grid-cols-3">
 							<ChecklistStep
 								number="1"
 								title="Create your first role"
+								hint="Start here"
 								href={`/dashboard/${companyId}/roles/new`}
 							/>
-							<ChecklistStep number="2" title="Share the link" />
-							<ChecklistStep number="3" title="Review your first applicant" />
+							<ChecklistStep number="2" title="Share the link" hint="Invite applicants" />
+							<ChecklistStep number="3" title="Review your first applicant" hint="Build the bench" />
 						</div>
 					</section>
 				) : (
-					<>
-						<section className="mb-8">
-							<h2 className="mb-4 text-6 font-bold text-gray-12">Needs your attention</h2>
-							<div className="grid gap-3 md:grid-cols-2">
+					<div className="grid gap-8">
+						<section className="premium-surface p-6 sm:p-8">
+							<p className="page-kicker">Priority</p>
+							<h2 className="section-title mt-2">Needs your attention</h2>
+							<div className="mt-5 grid gap-3 sm:grid-cols-2">
 								<Attention
 									title="New applications waiting for review"
 									value={applicantsInReview}
@@ -134,26 +141,31 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 								/>
 							</div>
 						</section>
-						<section className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+
+						<section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 							<Summary label="Open roles" value={openRoles} />
 							<Summary label="Applicants in review" value={applicantsInReview} />
 							<Summary label="Bench size" value={benchSize || 0} />
 							<Summary label="Available now" value={availableNow || 0} />
 						</section>
-						<section>
-							<div className="mb-4 flex items-center justify-between">
-								<h2 className="text-6 font-bold text-gray-12">Roles</h2>
-								<Link href={`/dashboard/${companyId}/roles`} className="text-3 font-semibold text-gray-11">
-									View all roles
+
+						<section className="premium-surface p-6 sm:p-8">
+							<div className="mb-5 flex items-center justify-between gap-3">
+								<div>
+									<p className="page-kicker">Pipelines</p>
+									<h2 className="section-title mt-1">Roles</h2>
+								</div>
+								<Link href={`/dashboard/${companyId}/roles`} className="button-link">
+									View all →
 								</Link>
 							</div>
 							<div className="grid gap-3">
-								{mapped.map((role) => (
+								{mapped.slice(0, 5).map((role) => (
 									<RoleCard key={role.id} role={role as never} companyId={companyId} />
 								))}
 							</div>
 						</section>
-					</>
+					</div>
 				)}
 			</div>
 		</main>
@@ -163,11 +175,12 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 function Summary({ label, value }: { label: string; value: number }) {
 	return (
 		<div className="metric-card">
-			<p className="text-3 text-gray-9">{label}</p>
-			<p className="mt-2 text-8 font-bold tabular-nums text-gray-12">{value}</p>
+			<p className="text-3 font-medium text-gray-9">{label}</p>
+			<p className="mt-2 text-8 font-bold tabular-nums tracking-tight text-gray-12">{value}</p>
 		</div>
 	);
 }
+
 function Attention({
 	title,
 	value,
@@ -178,30 +191,33 @@ function Attention({
 	href: string;
 }) {
 	return (
-		<Link href={href} className="action-card p-4 no-underline">
+		<Link href={href} className="attention-card no-underline">
 			<p className="text-3 font-semibold text-gray-12">{title}</p>
-			<p className="mt-2 text-4 text-gray-11">
+			<p className="mt-2 text-4 font-medium text-gray-11">
 				{value} <span aria-hidden="true">→</span>
 			</p>
 		</Link>
 	);
 }
+
 function ChecklistStep({
 	number,
 	title,
+	hint,
 	href,
 }: {
 	number: string;
 	title: string;
+	hint: string;
 	href?: string;
 }) {
 	const content = (
-		<div className="action-card p-5">
-			<span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-a4 text-3 font-bold text-gray-11">
+		<div className="attention-card h-full">
+			<span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-a5 bg-gray-1 text-3 font-bold text-gray-11">
 				{number}
 			</span>
 			<p className="mt-4 text-4 font-semibold text-gray-12">{title}</p>
-			<p className="mt-1 text-3 text-gray-9">{href ? "Start here" : "Keep this next step in view"}</p>
+			<p className="mt-1 text-3 text-gray-9">{hint}</p>
 		</div>
 	);
 	return href ? (
