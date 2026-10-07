@@ -7,17 +7,40 @@ import {
 } from "@/lib/crewcall-access";
 import { getWhopSdk } from "@/lib/whop-sdk";
 
+const WHOP_API = "https://api.whop.com/api/v1";
+
+async function whopFetch<T>(path: string, init?: RequestInit): Promise<T> {
+	const apiKey = process.env.WHOP_API_KEY;
+	if (!apiKey) throw new Error("WHOP_API_KEY is not set");
+
+	const res = await fetch(`${WHOP_API}${path}`, {
+		...init,
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			"Content-Type": "application/json",
+			...(init?.headers ?? {}),
+		},
+	});
+
+	if (!res.ok) {
+		const body = await res.text().catch(() => "");
+		throw new Error(`Whop ${path} ${res.status}: ${body.slice(0, 300)}`);
+	}
+
+	return res.json() as Promise<T>;
+}
+
 /**
  * Daily job: DM members whose trial or paid period ends in ~24 hours.
  *
  * Secure with CRON_SECRET:
  *   Authorization: Bearer <CRON_SECRET>
  *
- * Requires Whop app permissions:
+ * Uses Whop REST (not sdk.dmChannels) because @whop/sdk 0.0.3 does not
+ * expose DM methods. Requires app permissions:
  *   - dms:channel:manage
  *   - dms:message:manage
  *   - dms:read
- *   - membership:read (already needed for gating)
  */
 export async function GET(request: Request) {
 	const auth = request.headers.get("authorization");
@@ -91,13 +114,18 @@ export async function GET(request: Request) {
 				  ].join("\n");
 
 			try {
-				const channel = await sdk.dmChannels.create({
-					with_user_ids: [userId],
+				// REST so we don't depend on sdk.dmChannels (missing in @whop/sdk 0.0.3).
+				const channel = await whopFetch<{ id: string }>("/dm_channels", {
+					method: "POST",
+					body: JSON.stringify({ with_user_ids: [userId] }),
 				});
 
-				await sdk.messages.create({
-					channel_id: channel.id,
-					content,
+				await whopFetch("/messages", {
+					method: "POST",
+					body: JSON.stringify({
+						channel_id: channel.id,
+						content,
+					}),
 				});
 
 				reminded += 1;
