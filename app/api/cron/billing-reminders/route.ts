@@ -85,7 +85,7 @@ export async function GET(request: Request) {
 				: [
 						"**Your Crewcall Pro plan renews tomorrow.**",
 						"",
-						"Make sure your payment method is up to date so access isn&apos;t interrupted.",
+						"Make sure your payment method is up to date so access isn't interrupted.",
 						"",
 						`Update payment or cancel: ${CREWCALL_MANAGE_URL}`,
 				  ].join("\n");
