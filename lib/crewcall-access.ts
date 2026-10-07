@@ -40,27 +40,54 @@ function isPeriodStillValid(m: MembershipRow): boolean {
 	return end >= Date.now();
 }
 
+type PaymentListRow = {
+	status?: string;
+	membership_id?: string;
+	total?: { amount?: string };
+	usd_total?: { amount?: string };
+};
+
+/**
+ * @whop/sdk 0.0.3 PaymentListParams does not accept membership_id,
+ * so we hit the REST API directly to classify trial-ended vs payment-failed.
+ */
+async function listPaymentsForMembership(membershipId: string): Promise<PaymentListRow[]> {
+	const apiKey = process.env.WHOP_API_KEY;
+	if (!apiKey) return [];
+
+	const url = new URL("https://api.whop.com/api/v1/payments");
+	url.searchParams.set("membership_id", membershipId);
+	url.searchParams.set("first", "20");
+
+	const res = await fetch(url.toString(), {
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			"Content-Type": "application/json",
+		},
+	});
+
+	if (!res.ok) {
+		const body = await res.text().catch(() => "");
+		throw new Error(`payments list ${res.status}: ${body.slice(0, 200)}`);
+	}
+
+	const json = (await res.json()) as { data?: PaymentListRow[] };
+	return json.data ?? [];
+}
+
 /**
  * Distinguish trial-ended (never successfully paid) vs payment-failed
  * (had at least one paid charge that later failed to renew).
  */
 async function resolveLapsedKind(
-	sdk: ReturnType<typeof getWhopSdk>,
 	membershipId: string,
 ): Promise<Exclude<PaywallKind, "new">> {
 	try {
-		const payments = await sdk.payments.list({
-			membership_id: membershipId,
-			first: 20,
-		});
+		const payments = await listPaymentsForMembership(membershipId);
 
-		const hasSuccessfulPaidCharge = payments.data.some((p) => {
+		const hasSuccessfulPaidCharge = payments.some((p) => {
 			if (p.status !== "paid") return false;
-			const amount = Number(
-				(p as { total?: { amount?: string } }).total?.amount ??
-					(p as { usd_total?: { amount?: string } }).usd_total?.amount ??
-					"0",
-			);
+			const amount = Number(p.total?.amount ?? p.usd_total?.amount ?? "0");
 			return Number.isFinite(amount) && amount > 0;
 		});
 
@@ -117,7 +144,7 @@ export async function hasCrewcallAccess(): Promise<AccessResult> {
 		null;
 
 	if (lapsed) {
-		const kind = await resolveLapsedKind(sdk, lapsed.id);
+		const kind = await resolveLapsedKind(lapsed.id);
 		return {
 			userId,
 			hasAccess: false,
