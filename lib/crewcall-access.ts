@@ -10,17 +10,21 @@ const CREWCALL_ACCESS_GATING_ENABLED = true;
 
 /**
  * Checks whether the currently authenticated Whop user holds a valid
- * Crewcall Pro membership (active, trialing, canceling, or past_due).
+ * Crewcall Pro membership that should unlock the product.
  *
- * Memberships live under Crewcall's own company. We deliberately list
- * by user_id + plan_ids under CREWCALL_COMPANY_ID so the call never
- * depends on the installing company's reach (which caused the old
- * users.checkAccess 403 / "Access check unavailable" error).
+ * Memberships live under Crewcall's own company. We list by user_id +
+ * plan_ids under CREWCALL_COMPANY_ID so the call never depends on the
+ * installing company's reach (which caused the old users.checkAccess
+ * 403 / "Access check unavailable" error).
  *
- * Flow contract used by the dashboard layout:
- *   1. No workspace yet  → onboarding is shown (gate is skipped).
- *   2. Workspace exists  → this function runs; no access → paywall.
- *   3. Has access        → full dashboard.
+ * Access policy (strict — no unpaid grace):
+ *   - trialing  → free trial still running
+ *   - active    → paid and current
+ *   - canceling → paid through current period, cancels at period end
+ *
+ * past_due, canceled, expired, unresolved → no access (paywall).
+ * When a trial ends and the first charge fails, Whop moves the
+ * membership to past_due; we intentionally do NOT grant access then.
  */
 export async function hasCrewcallAccess() {
 	const sdk = getWhopSdk();
@@ -37,17 +41,28 @@ export async function hasCrewcallAccess() {
 		first: 10,
 	});
 
-	// Whop grants access for these statuses until the period actually ends.
-	const ACCESS_GRANTING_STATUSES = new Set([
-		"active",
-		"trialing",
-		"canceling",
-		"past_due",
-	]);
+	// Only statuses that mean the customer is in a paid/trial period.
+	// Do NOT include past_due — that is failed payment / expired trial.
+	const ACCESS_GRANTING_STATUSES = new Set(["active", "trialing", "canceling"]);
 
-	const hasAccess = memberships.data.some((m) =>
-		ACCESS_GRANTING_STATUSES.has(m.status),
-	);
+	const hasAccess = memberships.data.some((m) => {
+		if (!ACCESS_GRANTING_STATUSES.has(m.status)) return false;
+
+		// Safety: if Whop still reports trialing/active but the period
+		// end is already in the past, treat as no access.
+		const periodEnd =
+			(m as { renewal_period_end?: string | null }).renewal_period_end ??
+			(m as { current_period_end?: string | null }).current_period_end ??
+			null;
+		if (periodEnd) {
+			const endMs = Date.parse(periodEnd);
+			if (Number.isFinite(endMs) && endMs < Date.now()) {
+				return false;
+			}
+		}
+
+		return true;
+	});
 
 	return { userId, hasAccess };
 }
