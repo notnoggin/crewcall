@@ -1,6 +1,7 @@
 import { WhopApp } from "@whop/react/components";
 import type { Metadata } from "next";
 import "./globals.css";
+import "./bench-import.css";
 
 export const metadata: Metadata = {
 	metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://crewcall-ten.vercel.app"),
