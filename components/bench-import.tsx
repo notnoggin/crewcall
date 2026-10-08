@@ -6,10 +6,13 @@ import { BENCH_IMPORT_TEMPLATE_CSV, type BenchImportRowError } from "@/lib/bench
 
 type Props = {
 	companyId: string;
+	/** Full empty-state card */
 	empty?: boolean;
+	/** Short strip when bench already has people */
+	compact?: boolean;
 };
 
-export function BenchImport({ companyId, empty = false }: Props) {
+export function BenchImport({ companyId, empty = false, compact = false }: Props) {
 	const [open, setOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [fileName, setFileName] = useState<string | null>(null);
@@ -24,6 +27,11 @@ export function BenchImport({ companyId, empty = false }: Props) {
 		setMessage(null);
 		setErrors([]);
 		if (inputRef.current) inputRef.current.value = "";
+	};
+
+	const openModal = () => {
+		reset();
+		setOpen(true);
 	};
 
 	const onFile = useCallback(async (file: File | null) => {
@@ -99,38 +107,59 @@ export function BenchImport({ companyId, empty = false }: Props) {
 	return (
 		<>
 			{empty ? (
-				<section className="premium-surface import-empty p-8 sm:p-10">
-					<p className="page-kicker">Migrate your roster</p>
-					<h2 className="section-title mt-2">Already have a roster?</h2>
-					<p className="mt-3 max-w-xl text-3 text-gray-10">
-						Bring clippers, mods, and VAs from Google Forms, Sheets, or any spreadsheet into your
-						Crewcall bench in one step. Download the template, fill it in, and import.
-					</p>
-					<div className="mt-6 flex flex-wrap gap-3">
-						<Button size="3" onClick={() => { reset(); setOpen(true); }}>
+				<section className="premium-surface import-empty">
+					<div className="import-empty-copy">
+						<p className="page-kicker">Migrate your roster</p>
+						<h2 className="section-title mt-2">Already have a roster?</h2>
+						<p className="import-empty-lede">
+							Bring clippers, mods, and VAs from Google Forms, Sheets, or any spreadsheet into
+							your Crewcall bench in one step.
+						</p>
+					</div>
+
+					<div className="import-empty-actions">
+						<Button size="3" onClick={openModal}>
 							Import CSV
 						</Button>
 						<button type="button" className="btn-secondary" onClick={downloadTemplate}>
 							Download template
 						</button>
 					</div>
-					<ul className="import-steps mt-8">
+
+					<ol className="import-steps">
 						<li>
 							<span className="import-step-num">1</span>
 							<span>Export your Form or Sheet as CSV (or start from our template).</span>
 						</li>
 						<li>
 							<span className="import-step-num">2</span>
-							<span>Map columns to name, email, and role — optional fields are fine.</span>
+							<span>Keep columns for name and email — role and the rest are optional.</span>
 						</li>
 						<li>
 							<span className="import-step-num">3</span>
 							<span>Import. Duplicates are skipped automatically.</span>
 						</li>
-					</ul>
+					</ol>
 				</section>
+			) : compact ? (
+				<div className="import-compact">
+					<div className="import-compact-copy">
+						<p className="import-compact-title">Import roster</p>
+						<p className="import-compact-sub">
+							CSV from Sheets or Forms · name + email required
+						</p>
+					</div>
+					<div className="import-compact-actions">
+						<button type="button" className="btn-secondary" onClick={downloadTemplate}>
+							Template
+						</button>
+						<Button variant="classic" size="2" onClick={openModal}>
+							Import CSV
+						</Button>
+					</div>
+				</div>
 			) : (
-				<Button variant="classic" size="2" onClick={() => { reset(); setOpen(true); }}>
+				<Button variant="classic" size="2" onClick={openModal}>
 					Import CSV
 				</Button>
 			)}
@@ -216,9 +245,7 @@ export function BenchImport({ companyId, empty = false }: Props) {
 											{err.message}
 										</li>
 									))}
-									{errors.length > 12 && (
-										<li>…and {errors.length - 12} more</li>
-									)}
+									{errors.length > 12 && <li>…and {errors.length - 12} more</li>}
 								</ul>
 							</div>
 						)}

@@ -19,25 +19,66 @@
 	padding: 28px 28px 24px;
 }
 
+/* —— Empty state (no bench yet) —— */
+.bench-empty-stack {
+	display: grid;
+	gap: 28px;
+}
+
+.bench-empty-hint {
+	margin: 0;
+	text-align: center;
+	color: var(--gray-9);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
 .import-empty {
-	text-align: left;
+	padding: 32px 28px 28px;
+	display: grid;
+	gap: 28px;
+}
+
+@media (min-width: 640px) {
+	.import-empty {
+		padding: 36px 36px 32px;
+	}
+}
+
+.import-empty-copy {
+	max-width: 36rem;
+}
+
+.import-empty-lede {
+	margin-top: 12px;
+	color: var(--gray-10);
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.import-empty-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
 }
 
 .import-steps {
 	display: grid;
-	gap: 12px;
+	gap: 14px;
 	margin: 0;
-	padding: 0;
+	padding: 20px 0 0;
 	list-style: none;
+	border-top: 1px solid var(--gray-a4);
 }
 
 .import-steps li {
 	display: flex;
 	align-items: flex-start;
-	gap: 12px;
+	gap: 14px;
 	color: var(--gray-11);
 	font-size: 13px;
-	line-height: 1.45;
+	line-height: 1.5;
 }
 
 .import-step-num {
@@ -45,14 +86,53 @@
 	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
-	width: 24px;
-	height: 24px;
+	width: 26px;
+	height: 26px;
 	border-radius: 999px;
 	border: 1px solid var(--gray-a5);
 	background: var(--gray-1);
 	color: var(--gray-11);
 	font-size: 12px;
 	font-weight: 750;
+}
+
+/* —— Compact strip (bench already has people) —— */
+.bench-filled-stack {
+	display: grid;
+	gap: 16px;
+}
+
+.import-compact {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 16px;
+	padding: 12px 16px;
+	border: 1px solid var(--gray-a5);
+	border-radius: 14px;
+	background: var(--gray-a3);
+}
+
+.import-compact-title {
+	margin: 0;
+	color: var(--gray-12);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.import-compact-sub {
+	margin: 2px 0 0;
+	color: var(--gray-9);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.import-compact-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
 }
 
 .import-col-chip {
