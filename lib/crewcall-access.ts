@@ -5,7 +5,8 @@ export const CREWCALL_COMPANY_ID = "biz_zXEK1Sf9BNppBy";
 export const CREWCALL_PRO_PRODUCT_ID = "prod_2i0TRvygPsApM";
 export const CREWCALL_PRO_URL = "https://whop.com/crewcall/crewcall-pro/";
 export const CREWCALL_MANAGE_URL = "https://whop.com/@me/settings/memberships";
-export const CREWCALL_MONTHLY_PLAN_ID = "plan_ecX3Szio5Pj63";
+/** New monthly plan with 3-day trial (old plan_ecX3Szio5Pj63 is archived). */
+export const CREWCALL_MONTHLY_PLAN_ID = "plan_hqMX3rPUdXZ4K";
 export const CREWCALL_ANNUAL_PLAN_ID = "plan_7omVbkAtzy7J0";
 
 /** Always-on founder access for demos (your Whop user). */
