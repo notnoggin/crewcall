@@ -21,11 +21,16 @@ export default async function DashboardLayout({
 			return children;
 		}
 
-		const { hasAccess, paywallKind, manageUrl } = await hasCrewcallAccess();
+		const { hasAccess, paywallKind, ctaUrl, manageUrl } = await hasCrewcallAccess();
 
 		if (!hasAccess) {
 			return (
-				<Paywall kind={paywallKind} workspaceName={workspace?.name} manageUrl={manageUrl} />
+				<Paywall
+					kind={paywallKind}
+					workspaceName={workspace?.name}
+					ctaUrl={ctaUrl}
+					manageUrl={manageUrl}
+				/>
 			);
 		}
 	} catch (error) {

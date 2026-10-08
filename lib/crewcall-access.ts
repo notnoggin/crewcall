@@ -7,15 +7,28 @@ export const CREWCALL_PRO_URL = "https://whop.com/crewcall/crewcall-pro/";
 export const CREWCALL_MANAGE_URL = "https://whop.com/@me/settings/memberships";
 export const CREWCALL_MONTHLY_PLAN_ID = "plan_ecX3Szio5Pj63";
 export const CREWCALL_ANNUAL_PLAN_ID = "plan_7omVbkAtzy7J0";
+
+/** Always-on founder access for demos (your Whop user). */
+const FOUNDER_USER_IDS = new Set(["user_SX0PVtcb4LM15"]);
+
 const CREWCALL_ACCESS_GATING_ENABLED = true;
 
-export type PaywallKind = "new" | "trial_ended" | "payment_failed";
+/**
+ * Paywall states (Discord / Notion-style):
+ *   new            → never subscribed → Start trial / Subscribe
+ *   trial_ended    → trial over, no successful paid charge → Resubscribe
+ *   canceled       → canceled or expired after access → Resubscribe (welcome back)
+ *   payment_failed → past_due after a real paid period → Fix card (primary) + Resubscribe
+ */
+export type PaywallKind = "new" | "trial_ended" | "canceled" | "payment_failed";
 
 export type AccessResult = {
 	userId: string;
 	hasAccess: boolean;
-	/** Only meaningful when hasAccess is false. */
 	paywallKind: PaywallKind;
+	/** Primary CTA URL (subscribe or manage billing). */
+	ctaUrl: string;
+	/** Optional secondary link (e.g. manage memberships). */
 	manageUrl: string;
 };
 
@@ -25,6 +38,10 @@ type MembershipRow = {
 	renewal_period_end?: string | null;
 	current_period_end?: string | null;
 	manage_url?: string | null;
+	plan?: { id?: string } | null;
+	product?: { id?: string } | null;
+	product_id?: string | null;
+	plan_id?: string | null;
 };
 
 function periodEndMs(m: MembershipRow): number | null {
@@ -40,6 +57,10 @@ function isPeriodStillValid(m: MembershipRow): boolean {
 	return end >= Date.now();
 }
 
+function membershipProductId(m: MembershipRow): string | null {
+	return m.product?.id ?? m.product_id ?? null;
+}
+
 type PaymentListRow = {
 	status?: string;
 	membership_id?: string;
@@ -47,10 +68,6 @@ type PaymentListRow = {
 	usd_total?: { amount?: string };
 };
 
-/**
- * @whop/sdk 0.0.3 PaymentListParams does not accept membership_id,
- * so we hit the REST API directly to classify trial-ended vs payment-failed.
- */
 async function listPaymentsForMembership(membershipId: string): Promise<PaymentListRow[]> {
 	const apiKey = process.env.WHOP_API_KEY;
 	if (!apiKey) return [];
@@ -75,57 +92,66 @@ async function listPaymentsForMembership(membershipId: string): Promise<PaymentL
 	return json.data ?? [];
 }
 
-/**
- * Distinguish trial-ended (never successfully paid) vs payment-failed
- * (had at least one paid charge that later failed to renew).
- */
-async function resolveLapsedKind(
-	membershipId: string,
-): Promise<Exclude<PaywallKind, "new">> {
+async function hadSuccessfulPaidCharge(membershipId: string): Promise<boolean> {
 	try {
 		const payments = await listPaymentsForMembership(membershipId);
-
-		const hasSuccessfulPaidCharge = payments.some((p) => {
+		return payments.some((p) => {
 			if (p.status !== "paid") return false;
 			const amount = Number(p.total?.amount ?? p.usd_total?.amount ?? "0");
 			return Number.isFinite(amount) && amount > 0;
 		});
-
-		return hasSuccessfulPaidCharge ? "payment_failed" : "trial_ended";
 	} catch (error) {
-		console.error("Crewcall: could not classify lapsed membership", membershipId, error);
-		// Safer default for a failed renewal after trial.
-		return "trial_ended";
+		console.error("Crewcall: payment history lookup failed", membershipId, error);
+		return false;
 	}
 }
 
 /**
- * Access policy:
- *   trialing / active / canceling (period not ended) → access
- *   past_due / canceled / expired / period over       → paywall
+ * Access policy (real SaaS):
  *
- * Paywall kinds:
- *   new            → never subscribed (onboarding conversion)
- *   trial_ended    → trial finished, first charge failed or never paid
- *   payment_failed → had a real paid plan, renewal failed
+ * Grant when membership is active | trialing | canceling AND period not ended.
+ * Also grant free / any plan on the Crewcall Pro product (not only monthly/annual IDs).
+ *
+ * Deny + paywall:
+ *   past_due           → payment_failed (fix card)
+ *   canceled + ended   → canceled (resubscribe)
+ *   expired / trial end→ trial_ended or canceled based on payment history
+ *   no membership      → new (start trial)
  */
 export async function hasCrewcallAccess(): Promise<AccessResult> {
 	const sdk = getWhopSdk();
 	const { userId } = await sdk.verifyUserToken(await headers());
 
-	if (!CREWCALL_ACCESS_GATING_ENABLED) {
-		return { userId, hasAccess: true, paywallKind: "new", manageUrl: CREWCALL_MANAGE_URL };
+	if (FOUNDER_USER_IDS.has(userId)) {
+		return {
+			userId,
+			hasAccess: true,
+			paywallKind: "new",
+			ctaUrl: CREWCALL_PRO_URL,
+			manageUrl: CREWCALL_MANAGE_URL,
+		};
 	}
 
+	if (!CREWCALL_ACCESS_GATING_ENABLED) {
+		return {
+			userId,
+			hasAccess: true,
+			paywallKind: "new",
+			ctaUrl: CREWCALL_PRO_URL,
+			manageUrl: CREWCALL_MANAGE_URL,
+		};
+	}
+
+	// List all company memberships for this user (includes free plans),
+	// not only monthly/annual plan IDs.
 	const memberships = await sdk.memberships.list({
 		company_id: CREWCALL_COMPANY_ID,
 		user_ids: [userId],
-		plan_ids: [CREWCALL_MONTHLY_PLAN_ID, CREWCALL_ANNUAL_PLAN_ID],
-		first: 10,
+		first: 20,
 	});
 
-	const rows = memberships.data as MembershipRow[];
-	const ACCESS_GRANTING = new Set(["active", "trialing", "canceling"]);
+	const rows = (memberships.data as MembershipRow[]) ?? [];
+	const ACCESS_GRANTING = new Set(["active", "trialing", "canceling", "completed"]);
 
 	const valid = rows.find((m) => ACCESS_GRANTING.has(m.status) && isPeriodStillValid(m));
 	if (valid) {
@@ -133,31 +159,48 @@ export async function hasCrewcallAccess(): Promise<AccessResult> {
 			userId,
 			hasAccess: true,
 			paywallKind: "new",
+			ctaUrl: CREWCALL_PRO_URL,
 			manageUrl: valid.manage_url || CREWCALL_MANAGE_URL,
 		};
 	}
 
-	// Prefer a membership that clearly lapsed (past_due / expired / canceled).
-	const lapsed =
-		rows.find((m) => ["past_due", "expired", "canceled"].includes(m.status)) ??
+	// past_due = payment failed while subscription still “alive”
+	const pastDue = rows.find((m) => m.status === "past_due");
+	if (pastDue) {
+		return {
+			userId,
+			hasAccess: false,
+			paywallKind: "payment_failed",
+			ctaUrl: pastDue.manage_url || CREWCALL_MANAGE_URL,
+			manageUrl: pastDue.manage_url || CREWCALL_MANAGE_URL,
+		};
+	}
+
+	const canceledOrExpired =
+		rows.find((m) => m.status === "canceled" || m.status === "expired") ??
 		rows.find((m) => ACCESS_GRANTING.has(m.status) && !isPeriodStillValid(m)) ??
 		null;
 
-	if (lapsed) {
-		const kind = await resolveLapsedKind(lapsed.id);
+	if (canceledOrExpired) {
+		const paidBefore = await hadSuccessfulPaidCharge(canceledOrExpired.id);
+		const kind: PaywallKind =
+			canceledOrExpired.status === "canceled" || paidBefore ? "canceled" : "trial_ended";
+
+		// Always send them to subscribe / product page — not “fix payment” for a dead membership.
 		return {
 			userId,
 			hasAccess: false,
 			paywallKind: kind,
-			manageUrl: lapsed.manage_url || CREWCALL_MANAGE_URL,
+			ctaUrl: CREWCALL_PRO_URL,
+			manageUrl: CREWCALL_MANAGE_URL,
 		};
 	}
 
-	// No membership on our plans → first-time conversion paywall.
 	return {
 		userId,
 		hasAccess: false,
 		paywallKind: "new",
-		manageUrl: CREWCALL_PRO_URL,
+		ctaUrl: CREWCALL_PRO_URL,
+		manageUrl: CREWCALL_MANAGE_URL,
 	};
 }

@@ -48,11 +48,60 @@ function Brand() {
 type PaywallProps = {
 	kind: PaywallKind;
 	workspaceName?: string | null;
-	manageUrl: string;
+	/** Primary action URL */
+	ctaUrl: string;
+	/** Secondary / manage billing */
+	manageUrl?: string;
 };
 
-export function Paywall({ kind, workspaceName, manageUrl }: PaywallProps) {
+export function Paywall({ kind, workspaceName, ctaUrl, manageUrl }: PaywallProps) {
 	const workspaceLabel = workspaceName?.trim() || "your workspace";
+	const subscribeUrl = ctaUrl || CREWCALL_PRO_URL;
+
+	if (kind === "payment_failed") {
+		return (
+			<main className="paywall-page">
+				<div className="paywall-shell">
+					<Brand />
+					<div className="paywall-hero">
+						<p className="paywall-kicker">Payment issue</p>
+						<h1 className="paywall-title">
+							Update your payment method
+							<br />
+							to keep using Crewcall.
+						</h1>
+						<p className="paywall-lede">
+							Your last renewal for {workspaceLabel} didn&apos;t go through. Fix the card on file
+							and access returns automatically — your roles and bench stay saved.
+						</p>
+					</div>
+
+					<div className="paywall-offer">
+						<div className="paywall-offer-header">
+							<p className="paywall-offer-badge">Action needed</p>
+						</div>
+
+						<Link
+							href={manageUrl || subscribeUrl}
+							target="_blank"
+							rel="noreferrer"
+							className="paywall-cta"
+						>
+							Update payment method
+						</Link>
+
+						<p className="paywall-fineprint">
+							Prefer a different plan?{" "}
+							<a href={CREWCALL_PRO_URL} target="_blank" rel="noreferrer" className="paywall-text-link">
+								View plans
+							</a>
+							. Whop may also retry the charge automatically.
+						</p>
+					</div>
+				</div>
+			</main>
+		);
+	}
 
 	if (kind === "trial_ended") {
 		return (
@@ -64,18 +113,17 @@ export function Paywall({ kind, workspaceName, manageUrl }: PaywallProps) {
 						<h1 className="paywall-title">
 							Your trial has ended.
 							<br />
-							Fix payment to keep going.
+							Subscribe to keep going.
 						</h1>
 						<p className="paywall-lede">
-							We couldn&apos;t charge your card after the free trial for {workspaceLabel}.
-							Update your payment method to restore full access to roles, applicants, and your
-							bench.
+							{workspaceLabel} is still here — roles, applicants, and your bench. Pick a plan to
+							restore full access.
 						</p>
 					</div>
 
 					<div className="paywall-offer">
 						<div className="paywall-offer-header">
-							<p className="paywall-offer-badge">Payment required</p>
+							<p className="paywall-offer-badge">Continue with Pro</p>
 							<p className="paywall-offer-price">
 								<span className="paywall-offer-amount">$29.99</span>
 								<span className="paywall-offer-period">/month</span>
@@ -83,13 +131,13 @@ export function Paywall({ kind, workspaceName, manageUrl }: PaywallProps) {
 							<p className="paywall-offer-alt">or $279.99/year · cancel anytime</p>
 						</div>
 
-						<Link href={manageUrl || CREWCALL_PRO_URL} target="_blank" rel="noreferrer" className="paywall-cta">
-							Fix payment method
+						<Link href={subscribeUrl} target="_blank" rel="noreferrer" className="paywall-cta">
+							Choose a plan
 						</Link>
 
 						<p className="paywall-fineprint">
-							Once payment succeeds, access returns automatically. Your workspace data is still
-							here.
+							Opens Crewcall Pro checkout on Whop. After you subscribe, refresh this page to
+							continue.
 						</p>
 					</div>
 				</div>
@@ -97,40 +145,41 @@ export function Paywall({ kind, workspaceName, manageUrl }: PaywallProps) {
 		);
 	}
 
-	if (kind === "payment_failed") {
+	if (kind === "canceled") {
 		return (
 			<main className="paywall-page">
 				<div className="paywall-shell">
 					<Brand />
 					<div className="paywall-hero">
-						<p className="paywall-kicker">Payment issue</p>
+						<p className="paywall-kicker">Subscription ended</p>
 						<h1 className="paywall-title">
-							Fix your payment method
+							Welcome back.
 							<br />
-							to keep using Crewcall.
+							Resubscribe to reopen your desk.
 						</h1>
 						<p className="paywall-lede">
-							Your last renewal for {workspaceLabel} didn&apos;t go through. Update the card on
-							file so your hiring desk stays open.
+							Your previous plan for {workspaceLabel} is no longer active. Your data is safe —
+							subscribe again to get back in.
 						</p>
 					</div>
 
 					<div className="paywall-offer">
 						<div className="paywall-offer-header">
-							<p className="paywall-offer-badge">Action needed</p>
-							<p className="paywall-offer-alt" style={{ marginTop: 8 }}>
-								Roles, applicants, and your bench stay saved. Access resumes as soon as payment
-								succeeds.
+							<p className="paywall-offer-badge">Resubscribe</p>
+							<p className="paywall-offer-price">
+								<span className="paywall-offer-amount">$29.99</span>
+								<span className="paywall-offer-period">/month</span>
 							</p>
+							<p className="paywall-offer-alt">or $279.99/year · cancel anytime</p>
 						</div>
 
-						<Link href={manageUrl || CREWCALL_PRO_URL} target="_blank" rel="noreferrer" className="paywall-cta">
-							Update payment method
+						<Link href={subscribeUrl} target="_blank" rel="noreferrer" className="paywall-cta">
+							View plans &amp; subscribe
 						</Link>
 
 						<p className="paywall-fineprint">
-							Manage billing anytime at Whop → Memberships. Whop may also retry the charge
-							automatically.
+							After checkout, return here and refresh. Access unlocks as soon as Whop confirms
+							your membership.
 						</p>
 					</div>
 				</div>
@@ -138,7 +187,7 @@ export function Paywall({ kind, workspaceName, manageUrl }: PaywallProps) {
 		);
 	}
 
-	// kind === "new" — first-time conversion
+	// kind === "new"
 	return (
 		<main className="paywall-page">
 			<div className="paywall-shell">
@@ -181,7 +230,7 @@ export function Paywall({ kind, workspaceName, manageUrl }: PaywallProps) {
 						<p className="paywall-offer-alt">or $279.99/year · cancel anytime</p>
 					</div>
 
-					<Link href={CREWCALL_PRO_URL} target="_blank" rel="noreferrer" className="paywall-cta">
+					<Link href={subscribeUrl} target="_blank" rel="noreferrer" className="paywall-cta">
 						Start free trial
 					</Link>
 
