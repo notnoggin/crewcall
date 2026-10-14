@@ -20,13 +20,19 @@ export const metadata: Metadata = {
 	},
 };
 
+/** Runs before paint so the page never flashes light mode when dark is preferred. */
+const themeScript = `(function(){try{var t=localStorage.getItem("crewcall-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.dataset.theme="dark";}})();`;
+
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="en" data-theme="dark" suppressHydrationWarning>
+			<head>
+				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
+			</head>
 			<body className="antialiased">
 				<WhopApp>{children}</WhopApp>
 			</body>
