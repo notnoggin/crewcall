@@ -494,7 +494,7 @@ button:focus-visible {
 	opacity: 0.65;
 }
 
-button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
+button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):not(.queue-applicant-card) {
 	border: 1px solid #18181b;
 	border-radius: 11px;
 	background: #18181b;
@@ -503,7 +503,7 @@ button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onbo
 	transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
-button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
+button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):not(.queue-applicant-card):hover:not(:disabled) {
 	border-color: #000000;
 	background: #000000;
 	color: #ffffff;
@@ -511,23 +511,53 @@ button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onbo
 	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
 }
 
-button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):disabled {
+button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):not(.queue-applicant-card):disabled {
 	cursor: not-allowed;
 	opacity: 0.55;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip) {
+[data-theme="dark"] button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):not(.queue-applicant-card) {
 	border-color: #ffffff;
 	background: #ffffff;
 	color: #18181b;
 }
 
-[data-theme="dark"] button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):hover:not(:disabled) {
+[data-theme="dark"] button:not(.theme-toggle):not(.theme-switch-option):not(.field-remove):not(.onboarding-choice):not(.nav-link):not(.btn-secondary):not(.btn-ghost-danger):not(.role-filter-chip):not(.queue-applicant-card):hover:not(:disabled) {
 	border-color: #e4e4e7;
 	background: #e4e4e7;
 	color: #09090b;
 	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 }
+
+/* Review queue applicant cards — keep theme colors, not primary button styles */
+.queue-applicant-card {
+	display: block;
+	width: 100%;
+	border: 1px solid var(--gray-a5) !important;
+	border-radius: 12px !important;
+	background: var(--gray-1) !important;
+	color: var(--gray-12) !important;
+	font-weight: 500 !important;
+	text-align: left;
+	box-shadow: none !important;
+	transform: none !important;
+	cursor: pointer;
+}
+.queue-applicant-card:hover {
+	border-color: var(--accent-9) !important;
+	background: var(--gray-2) !important;
+	color: var(--gray-12) !important;
+	transform: none !important;
+	box-shadow: none !important;
+}
+.queue-applicant-card p,
+.queue-applicant-card span {
+	color: inherit;
+}
+.queue-applicant-card .text-gray-12 { color: var(--gray-12) !important; }
+.queue-applicant-card .text-gray-10 { color: var(--gray-10) !important; }
+.queue-applicant-card .text-gray-9 { color: var(--gray-9) !important; }
+
 
 .onboarding-choice {
 	display: flex;
