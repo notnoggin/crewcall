@@ -25,8 +25,8 @@ export async function POST(
 	{ params }: { params: Promise<{ applicationId: string }> },
 ) {
 	const { applicationId } = await params;
-	const { hasAccess } = await hasCrewcallAccess();
-	if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
+	const { hasAccess, isPro } = await hasCrewcallAccess();
+	if (!hasAccess) return NextResponse.json({ error: "Update your payment method to keep using Crewcall." }, { status: 403 });
 	const whopsdk = getWhopSdk();
 	const { userId } = await whopsdk.verifyUserToken(await headers());
 	const body = (await request.json()) as ActionBody;
@@ -81,6 +81,16 @@ export async function POST(
 	} else if (body.action === "hire") {
 		const { data: roleData } = await supabase.from("roles").select("workspace_id, type, intake_mode, seat_cap").eq("id", application.role_id).single();
 		if (!roleData) return NextResponse.json({ error: "Role not found." }, { status: 404 });
+		if (!isPro) {
+			const { count: benchCount } = await supabase
+				.from("roster_entries")
+				.select("id", { count: "exact", head: true })
+				.eq("workspace_id", roleData.workspace_id)
+				.neq("status", "dismissed");
+			if ((benchCount || 0) >= 5) {
+				return NextResponse.json({ error: "Free plan bench is full (5 people). Upgrade to Pro for an unlimited bench." }, { status: 402 });
+			}
+		}
 		const { data: existingRosterEntry, error: rosterLookupError } = await supabase
 			.from("roster_entries")
 			.select("id, status")
