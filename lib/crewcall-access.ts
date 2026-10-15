@@ -9,27 +9,26 @@ export const CREWCALL_MANAGE_URL = "https://whop.com/@me/settings/memberships";
 export const CREWCALL_MONTHLY_PLAN_ID = "plan_hqMX3rPUdXZ4K";
 export const CREWCALL_ANNUAL_PLAN_ID = "plan_7omVbkAtzy7J0";
 
+/** Free tier limits. Pro is unlimited. */
+export const FREE_ROLE_LIMIT = 1;
+export const FREE_BENCH_LIMIT = 5;
+
 /** Always-on founder access for demos (your Whop user). */
 const FOUNDER_USER_IDS = new Set(["user_SX0PVtcb4LM15"]);
 
 const CREWCALL_ACCESS_GATING_ENABLED = true;
 
-/**
- * Paywall states (Discord / Notion-style):
- *   new            → never subscribed → Start trial / Subscribe
- *   trial_ended    → trial over, no successful paid charge → Resubscribe
- *   canceled       → canceled or expired after access → Resubscribe (welcome back)
- *   payment_failed → past_due after a real paid period → Fix card (primary) + Resubscribe
- */
 export type PaywallKind = "new" | "trial_ended" | "canceled" | "payment_failed";
+export type AccessTier = "free" | "pro";
 
 export type AccessResult = {
 	userId: string;
+	/** True when the user can open the app (free or pro). False only for past_due. */
 	hasAccess: boolean;
+	tier: AccessTier;
+	isPro: boolean;
 	paywallKind: PaywallKind;
-	/** Primary CTA URL (subscribe or manage billing). */
 	ctaUrl: string;
-	/** Optional secondary link (e.g. manage memberships). */
 	manageUrl: string;
 };
 
@@ -58,93 +57,47 @@ function isPeriodStillValid(m: MembershipRow): boolean {
 	return end >= Date.now();
 }
 
-function membershipProductId(m: MembershipRow): string | null {
-	return m.product?.id ?? m.product_id ?? null;
+function freeAccess(userId: string, paywallKind: PaywallKind = "new"): AccessResult {
+	return {
+		userId,
+		hasAccess: true,
+		tier: "free",
+		isPro: false,
+		paywallKind,
+		ctaUrl: CREWCALL_PRO_URL,
+		manageUrl: CREWCALL_MANAGE_URL,
+	};
 }
 
-type PaymentListRow = {
-	status?: string;
-	membership_id?: string;
-	total?: { amount?: string };
-	usd_total?: { amount?: string };
-};
-
-async function listPaymentsForMembership(membershipId: string): Promise<PaymentListRow[]> {
-	const apiKey = process.env.WHOP_API_KEY;
-	if (!apiKey) return [];
-
-	const url = new URL("https://api.whop.com/api/v1/payments");
-	url.searchParams.set("membership_id", membershipId);
-	url.searchParams.set("first", "20");
-
-	const res = await fetch(url.toString(), {
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-			"Content-Type": "application/json",
-		},
-	});
-
-	if (!res.ok) {
-		const body = await res.text().catch(() => "");
-		throw new Error(`payments list ${res.status}: ${body.slice(0, 200)}`);
-	}
-
-	const json = (await res.json()) as { data?: PaymentListRow[] };
-	return json.data ?? [];
-}
-
-async function hadSuccessfulPaidCharge(membershipId: string): Promise<boolean> {
-	try {
-		const payments = await listPaymentsForMembership(membershipId);
-		return payments.some((p) => {
-			if (p.status !== "paid") return false;
-			const amount = Number(p.total?.amount ?? p.usd_total?.amount ?? "0");
-			return Number.isFinite(amount) && amount > 0;
-		});
-	} catch (error) {
-		console.error("Crewcall: payment history lookup failed", membershipId, error);
-		return false;
-	}
+function proAccess(userId: string, manageUrl?: string | null): AccessResult {
+	return {
+		userId,
+		hasAccess: true,
+		tier: "pro",
+		isPro: true,
+		paywallKind: "new",
+		ctaUrl: CREWCALL_PRO_URL,
+		manageUrl: manageUrl || CREWCALL_MANAGE_URL,
+	};
 }
 
 /**
- * Access policy (real SaaS):
- *
- * Grant when membership is active | trialing | canceling AND period not ended.
- * Also grant free / any plan on the Crewcall Pro product (not only monthly/annual IDs).
- *
- * Deny + paywall:
- *   past_due           → payment_failed (fix card)
- *   canceled + ended   → canceled (resubscribe)
- *   expired / trial end→ trial_ended or canceled based on payment history
- *   no membership      → new (start trial)
+ * Free tier by default so people can try Crewcall without a card.
+ * Pro when membership is active | trialing | canceling and the period is still valid.
+ * past_due still blocks until the payment is fixed.
  */
 export async function hasCrewcallAccess(): Promise<AccessResult> {
 	const sdk = getWhopSdk();
 	const { userId } = await sdk.verifyUserToken(await headers());
 
 	if (FOUNDER_USER_IDS.has(userId)) {
-		return {
-			userId,
-			hasAccess: true,
-			paywallKind: "new",
-			ctaUrl: CREWCALL_PRO_URL,
-			manageUrl: CREWCALL_MANAGE_URL,
-		};
+		return proAccess(userId);
 	}
 
 	if (!CREWCALL_ACCESS_GATING_ENABLED) {
-		return {
-			userId,
-			hasAccess: true,
-			paywallKind: "new",
-			ctaUrl: CREWCALL_PRO_URL,
-			manageUrl: CREWCALL_MANAGE_URL,
-		};
+		return proAccess(userId);
 	}
 
-	// List all company memberships for this user (includes free plans),
-	// not only monthly/annual plan IDs.
 	const memberships = await sdk.memberships.list({
 		company_id: CREWCALL_COMPANY_ID,
 		user_ids: [userId],
@@ -156,21 +109,16 @@ export async function hasCrewcallAccess(): Promise<AccessResult> {
 
 	const valid = rows.find((m) => ACCESS_GRANTING.has(m.status) && isPeriodStillValid(m));
 	if (valid) {
-		return {
-			userId,
-			hasAccess: true,
-			paywallKind: "new",
-			ctaUrl: CREWCALL_PRO_URL,
-			manageUrl: valid.manage_url || CREWCALL_MANAGE_URL,
-		};
+		return proAccess(userId, valid.manage_url);
 	}
 
-	// past_due = payment failed while subscription still “alive”
 	const pastDue = rows.find((m) => m.status === "past_due");
 	if (pastDue) {
 		return {
 			userId,
 			hasAccess: false,
+			tier: "free",
+			isPro: false,
 			paywallKind: "payment_failed",
 			ctaUrl: pastDue.manage_url || CREWCALL_MANAGE_URL,
 			manageUrl: pastDue.manage_url || CREWCALL_MANAGE_URL,
@@ -183,25 +131,11 @@ export async function hasCrewcallAccess(): Promise<AccessResult> {
 		null;
 
 	if (canceledOrExpired) {
-		const paidBefore = await hadSuccessfulPaidCharge(canceledOrExpired.id);
-		const kind: PaywallKind =
-			canceledOrExpired.status === "canceled" || paidBefore ? "canceled" : "trial_ended";
-
-		// Always send them to subscribe / product page — not “fix payment” for a dead membership.
-		return {
+		return freeAccess(
 			userId,
-			hasAccess: false,
-			paywallKind: kind,
-			ctaUrl: CREWCALL_PRO_URL,
-			manageUrl: CREWCALL_MANAGE_URL,
-		};
+			canceledOrExpired.status === "canceled" ? "canceled" : "trial_ended",
+		);
 	}
 
-	return {
-		userId,
-		hasAccess: false,
-		paywallKind: "new",
-		ctaUrl: CREWCALL_PRO_URL,
-		manageUrl: CREWCALL_MANAGE_URL,
-	};
+	return freeAccess(userId, "new");
 }
