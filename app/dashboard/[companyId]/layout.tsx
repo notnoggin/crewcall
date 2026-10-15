@@ -16,14 +16,15 @@ export default async function DashboardLayout({
 			.eq("whop_company_id", companyId)
 			.maybeSingle();
 
-		// Only gate after the user has completed onboarding (set a real workspace name).
+		// Onboarding always wins over billing.
 		if (!isWorkspaceOnboarded(workspace)) {
 			return children;
 		}
 
 		const { hasAccess, paywallKind, ctaUrl, manageUrl } = await hasCrewcallAccess();
 
-		if (!hasAccess) {
+		// Free tier can use the product. Only a failed renewal hard-blocks.
+		if (!hasAccess && paywallKind === "payment_failed") {
 			return (
 				<Paywall
 					kind={paywallKind}
