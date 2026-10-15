@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { hasCrewcallAccess } from "@/lib/crewcall-access";
+import { CREWCALL_PRO_URL, hasCrewcallAccess } from "@/lib/crewcall-access";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getWhopSdk } from "@/lib/whop-sdk";
 import { BENCH_IMPORT_MAX_ROWS, parseBenchImportCsv } from "@/lib/bench-import";
 
 export async function POST(request: Request) {
-	const { hasAccess } = await hasCrewcallAccess();
+	const { hasAccess, isPro } = await hasCrewcallAccess();
 	if (!hasAccess) {
-		return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
+		return NextResponse.json({ error: "Update your payment method to keep using Crewcall." }, { status: 403 });
+	}
+	if (!isPro) {
+		return NextResponse.json(
+			{ error: `CSV import is a Pro feature. Upgrade at ${CREWCALL_PRO_URL}` },
+			{ status: 402 },
+		);
 	}
 
 	await getWhopSdk().verifyUserToken(await headers());
@@ -40,7 +46,6 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "Workspace not found." }, { status: 404 });
 	}
 
-	// Existing emails on this bench (from applications + prior imports)
 	const { data: existing } = await supabase
 		.from("roster_entries")
 		.select("id, contact_email, applications(applicant_email)")
