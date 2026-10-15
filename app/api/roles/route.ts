@@ -5,10 +5,25 @@ import { positiveInteger, stringValue } from "@/lib/validation";
 import { hasCrewcallAccess } from "@/lib/crewcall-access";
 
 export async function POST(request: Request) {
-	const { hasAccess } = await hasCrewcallAccess();
-	if (!hasAccess) return NextResponse.json({ error: "Crewcall Pro membership is required." }, { status: 403 });
+	const { hasAccess, isPro } = await hasCrewcallAccess();
+	if (!hasAccess) return NextResponse.json({ error: "Update your payment method to keep using Crewcall." }, { status: 403 });
 	const formData = await request.formData();
 	const workspaceId = stringValue(formData.get("workspaceId"));
+
+	if (!isPro && workspaceId) {
+		const { count } = await getSupabaseAdmin()
+			.from("roles")
+			.select("id", { count: "exact", head: true })
+			.eq("workspace_id", workspaceId)
+			.neq("status", "closed");
+		if ((count || 0) >= 1) {
+			return NextResponse.json(
+				{ error: "Free plan includes 1 role. Upgrade to Pro for unlimited roles." },
+				{ status: 402 },
+			);
+		}
+	}
+
 	const title = stringValue(formData.get("title"));
 	const type = stringValue(formData.get("type"));
 	const intakeMode = stringValue(formData.get("intakeMode")) || "roster";
