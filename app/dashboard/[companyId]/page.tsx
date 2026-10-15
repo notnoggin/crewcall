@@ -7,6 +7,8 @@ import { OnboardingForm } from "@/components/onboarding-form";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getWhopSdk } from "@/lib/whop-sdk";
 import { isWorkspaceOnboarded } from "@/lib/workspace";
+import { hasCrewcallAccess } from "@/lib/crewcall-access";
+import { FreeTierBanner } from "@/components/free-tier-banner";
 
 export default async function DashboardPage({ params }: { params: Promise<{ companyId: string }> }) {
 	const { companyId } = await params;
@@ -33,6 +35,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 			</main>
 		);
 	}
+
+	const access = await hasCrewcallAccess();
+	const isPro = access.isPro;
 
 	const [{ data: roles }, { count: benchSize }, { count: availableNow }] = await Promise.all([
 		supabase
@@ -83,6 +88,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ comp
 		<main className="dashboard-shell">
 			<div>
 				<DashboardNav companyId={companyId} />
+				{!isPro && <FreeTierBanner />}
 
 				<header className="page-header">
 					<div>
