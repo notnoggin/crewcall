@@ -34,7 +34,7 @@ export default function RootLayout({
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
 			</head>
 			<body className="antialiased">
-				<WhopApp accentColor="orange">{children}</WhopApp>
+				<WhopApp>{children}</WhopApp>
 			</body>
 		</html>
 	);
