@@ -1,9 +1,22 @@
+import { redirect } from "next/navigation";
+import { getWhopSdk } from "@/lib/whop-sdk";
+
 export default async function ExperiencePage({
 	params,
 }: {
 	params: Promise<{ experienceId: string }>;
 }) {
 	const { experienceId } = await params;
+
+	try {
+		const experience = await getWhopSdk().experiences.retrieve(experienceId);
+		const companyId = experience.company?.id;
+		if (companyId) {
+			redirect(`/dashboard/${companyId}`);
+		}
+	} catch (error) {
+		console.error("Could not open Crewcall from experience:", error);
+	}
 
 	return (
 		<main className="min-h-screen px-5 py-16">
@@ -12,11 +25,11 @@ export default async function ExperiencePage({
 					Crewcall
 				</p>
 				<h1 className="mt-3 text-7 font-bold text-gray-12">
-					Open Crewcall from your company dashboard
+					Could not open this workspace
 				</h1>
 				<p className="mt-3 text-4 text-gray-10">
-					Crewcall is a creator-facing hiring tool, so its active view lives
-					in the Whop dashboard rather than a member experience.
+					Reload the app. If it stays on this screen, open Crewcall from the
+					company dashboard.
 				</p>
 				<p className="mt-4 text-2 text-gray-9">
 					Experience reference: {experienceId}
