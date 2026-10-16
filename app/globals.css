@@ -12,4 +12,32 @@
 	--background: #f7f7f8;
 	--foreground: #18181b;
 	--accent-9: #ff5722;
+	--accent-10: #e64a19;
+	--accent-11: #d84315;
+	--accent-a3: rgba(255, 87, 34, 0.12);
+}
+
+[data-theme="dark"] {
+	--accent-9: #ff5722;
+	--accent-10: #ff7043;
+	--accent-11: #ff8a65;
+	--accent-a3: rgba(255, 87, 34, 0.18);
+}
+
+/* Force nav active indicator and any remaining blue accents to brand orange */
+.nav-link[data-active="true"]::after {
+	background: #ff5722 !important;
+}
+
+.nav-link[data-active="true"] {
+	box-shadow: inset 0 0 0 1px rgba(255, 87, 34, 0.25);
+}
+
+/* Override any Frosted/Whop blue defaults */
+[class*="blue"],
+.accent-blue,
+.text-blue,
+.bg-blue,
+.border-blue {
+	--accent-9: #ff5722;
 }
