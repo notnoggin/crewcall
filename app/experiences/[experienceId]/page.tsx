@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { getWhopSdk } from "@/lib/whop-sdk";
 
 export default async function ExperiencePage({
 	params,
@@ -9,10 +8,31 @@ export default async function ExperiencePage({
 	const { experienceId } = await params;
 
 	try {
-		const experience = await getWhopSdk().experiences.retrieve(experienceId);
-		const companyId = experience.company?.id;
-		if (companyId) {
-			redirect(`/dashboard/${companyId}`);
+		const response = await fetch(
+			`https://api.whop.com/api/v1/experiences/${experienceId}`,
+			{
+				headers: {
+					Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
+				},
+				cache: "no-store",
+			},
+		);
+
+		if (response.ok) {
+			const experience = (await response.json()) as {
+				company?: { id?: string } | null;
+				account?: { id?: string } | null;
+			};
+			const companyId = experience.company?.id || experience.account?.id;
+			if (companyId) {
+				redirect(`/dashboard/${companyId}`);
+			}
+		} else {
+			console.error(
+				"Experience lookup failed:",
+				response.status,
+				await response.text(),
+			);
 		}
 	} catch (error) {
 		console.error("Could not open Crewcall from experience:", error);
@@ -28,8 +48,8 @@ export default async function ExperiencePage({
 					Could not open this workspace
 				</h1>
 				<p className="mt-3 text-4 text-gray-10">
-					Reload the app. If it stays on this screen, open Crewcall from the
-					company dashboard.
+					Open Crewcall from the company dashboard under Apps. The sidebar
+					view needs the experience read permission on the new app.
 				</p>
 				<p className="mt-4 text-2 text-gray-9">
 					Experience reference: {experienceId}
